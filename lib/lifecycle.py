@@ -6,6 +6,7 @@ The install process should copy this file to the same location as shoebot.
 Functions here are expected to work not need shoebot in the library path.
 
 """
+from .utils import AsynchronousFileReader
 
 try:
     import queue
@@ -15,13 +16,10 @@ except ImportError:
 import base64
 import collections
 import os
+import re
 import subprocess
 import sys
-import textwrap
-import threading
-import time
 import uuid
-import re
 
 PY3 = sys.version_info[0] == 3
 
@@ -29,47 +27,6 @@ CMD_LOAD_BASE64 = 'load_base64'
 
 RESPONSE_CODE_OK = "CODE_OK"
 RESPONSE_REVERTED = "REVERTED"
-
-
-class AsynchronousFileReader(threading.Thread):
-    """
-    Helper class to implement asynchronous reading of a file
-    in a separate thread. Pushes read lines on a queue to
-    be consumed in another thread.
-    """
-
-    def __init__(self, fd, q, althandler=None):
-        assert isinstance(q, queue.Queue)
-        assert callable(fd.readline)
-        threading.Thread.__init__(self)
-        self._fd = fd
-        self._queue = q
-        self._althandler = althandler
-
-    def run(self):
-        """
-        The body of the tread: read lines and put them on the queue.
-        """
-        try:
-            for line in iter(self._fd.readline, False):
-                if line is not None:
-                    if self._althandler:
-                        if self._althandler(line):
-                            # If the althandler returns True
-                            # then don't process this as usual
-                            continue
-                self._queue.put(line)
-                if not line:
-                    time.sleep(0.1)
-        except ValueError:  # This can happen if we are closed during readline - TODO - better fix.
-            if not self._fd.closed:
-                raise
-
-    def eof(self):
-        """
-        Check whether there is no more content to expect.
-        """
-        return (not self.is_alive()) and self._queue.empty() or self._fd.closed
 
 
 class CommandResponse(collections.namedtuple("CommandResponse", ['cmd', 'cookie', 'status', 'info'])):
@@ -90,7 +47,9 @@ class ShoebotProcess(object):
     come back in the response_queue
 
     """
-    def __init__(self, source, use_socketserver, show_varwindow, use_fullscreen, verbose, title, cwd=None, handle_stdout=None, handle_stderr=None, sbot=None):
+
+    def __init__(self, source, use_socketserver, show_varwindow, use_fullscreen, verbose, title, cwd=None,
+                 handle_stdout=None, handle_stderr=None, sbot=None):
         # start with -w for window -l for shell'
         command = [sbot, '-wl', '-t%s - Shoebot on gedit' % title]
 
@@ -105,7 +64,7 @@ class ShoebotProcess(object):
 
         if verbose:
             command.append("-V")
-        
+
         command.append(source)
 
         # Setup environment so shoebot directory is first
@@ -118,7 +77,8 @@ class ShoebotProcess(object):
         else:
             print('no sbot!')
 
-        self.process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1, close_fds=os.name != 'nt', shell=False, cwd=cwd)
+        self.process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                        bufsize=1, close_fds=os.name != 'nt', shell=False, cwd=cwd)
 
         self.running = True
 
@@ -128,7 +88,7 @@ class ShoebotProcess(object):
             line = line.decode('utf-8').rstrip()
             for cookie, response in list(self.responses.items()):
                 if line.startswith(cookie):
-                    pattern = r"^"+cookie+"\s?(?P<status>(.*?))[\:>](?P<info>.*)"
+                    pattern = r"^" + cookie + "\s?(?P<status>(.*?))[\:>](?P<info>.*)"
 
                     match = re.match(pattern, line)
                     d = match.groupdict()
@@ -166,7 +126,7 @@ class ShoebotProcess(object):
 
         self.source = source.rstrip('\n')
 
-        #self.setup_io()
+        # self.setup_io()
 
     def setup_io(self):
         # Turn off user prompts
@@ -262,62 +222,3 @@ class ShoebotProcess(object):
             line = self.response_queue.get()
             if line is not None:
                 yield line
-
-
-def get_example_dir():
-    return _example_dir
-
-
-def find_example_dir():
-    """
-    Find examples dir .. a little bit ugly..
-    """
-    # Replace %s with directory to check for shoebot menus.
-    code_stub = textwrap.dedent("""
-    from pkg_resources import resource_filename, Requirement, DistributionNotFound
-    try:
-        print(resource_filename(Requirement.parse('shoebot'), '%s'))
-    except DistributionNotFound:
-        pass
-
-    """)
-
-
-    # Needs to run in same python env as shoebot (may be different to gedits)
-    code = code_stub % 'share/shoebot/examples'
-    cmd = ["python", "-c", code]    
-    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    output, errors = p.communicate()
-    if errors:
-        print('Shoebot experienced errors searching for install and examples.')
-        print('Errors:\n{0}'.format(errors.decode('utf-8')))
-        return None
-    else:
-        examples_dir = output.decode('utf-8').strip()
-        if os.path.isdir(examples_dir):
-            return examples_dir
-
-        # If user is running 'setup.py develop' then examples could be right here
-        #code = "from pkg_resources import resource_filename, Requirement; print resource_filename(Requirement.parse('shoebot'), 'examples/')"
-        code = code_stub % 'examples/'
-        cmd = ["python", "-c", code]
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-        output, errors = p.communicate()
-        examples_dir = output.decode('utf-8').strip()
-        if os.path.isdir(examples_dir):
-            return examples_dir
-
-        if examples_dir:
-            print('Shoebot could not find examples at: {0}'.format(examples_dir))
-        else:
-            print('Shoebot could not find install dir and examples.')
-
-
-def make_readable_filename(fn):
-    """
-    Change filenames for display in the menu.
-    """
-    return os.path.splitext(fn)[0].replace('_', ' ').capitalize()
-
-
-_example_dir = find_example_dir()
