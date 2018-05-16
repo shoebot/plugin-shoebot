@@ -1,7 +1,11 @@
-import Queue as queue
 import os
 import threading
 import time
+
+try:
+    import Queue as queue
+except ImportError:
+    import queue
 
 
 def make_readable_filename(fn):
@@ -14,7 +18,7 @@ def make_readable_filename(fn):
 class AsynchronousFileReader(threading.Thread):
     """
     Helper class to implement asynchronous reading of a file
-    in a separate thread. Pushes read lines on a queue to
+    in a separate thread. Pushes read lines onto a queue to
     be consumed in another thread.
     """
 

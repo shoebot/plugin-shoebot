@@ -10,9 +10,45 @@ here = os.path.dirname(os.path.abspath(__file__))
 
 try:
     from setuptools import setup, Command, find_packages
+    from setuptools.command.install import install
 except ImportError:
     sys.exit("Install setuptools before plugin-shoebot")
 
+
+class InstallCommand(install):
+    """Customized setuptools install command - prints a friendly greeting."""
+    ALL_PLUGINS = {'gedit'}
+    description = "Installs plugin-shoebot"
+
+    user_options = install.user_options + [
+        ('plugins=', None, 'Install gedit plugin.'),
+    ]
+
+    def initialize_options(self):
+        self.plugins = None
+        install.initialize_options(self)
+
+    def finalize_options(self):
+        if self.plugins is None:
+            self.plugins = InstallCommand.ALL_PLUGINS
+        else:
+            self.plugins = set(self.plugins.split())
+            if 'all' in self.plugins:
+                self.plugins.pop('all')
+                self.plugins.update(InstallCommand.ALL_PLUGINS)
+            if not self.plugins.issubset(InstallCommand.ALL_PLUGINS):
+                valid_plugins = ' '.join(InstallCommand.ALL_PLUGINS)
+                invalid_plugins = ' '.join(self.plugins.difference(InstallCommand.ALL_PLUGINS))
+                sys.stderr.write('Invalid plugins specified: "%s", valid plugins: "%s"\n' % (invalid_plugins, valid_plugins))
+                sys.exit(1)
+        for plugin in self. plugins:
+            pass
+        install.finalize_options(self)
+
+    def run(self):
+        print(self.plugins)
+        print("Hello, developer, how are you? :)")
+        install.run(self)
 
 class CleanCommand(Command):
     """Custom clean command to tidy up the project root."""
@@ -49,5 +85,6 @@ setup(
     packages=find_packages(),
     cmdclass={
         'clean': CleanCommand,
+        'install': InstallCommand
     },
 )

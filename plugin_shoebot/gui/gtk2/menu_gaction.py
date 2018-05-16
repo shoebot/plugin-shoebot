@@ -4,7 +4,7 @@ Gtk3 support for shoebot in editors and IDEs
 
 import os
 
-from shoebot_extensions import get_example_dir
+from plugin_shoebot import get_example_dir
 
 MENU_UI = """
 <ui>

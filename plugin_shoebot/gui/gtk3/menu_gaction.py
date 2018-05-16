@@ -5,8 +5,8 @@ Gtk3 support for shoebot in editors and IDEs
 import os
 
 from gi.repository import Gtk
-from shoebot_extensions.examples import get_example_dir
-from shoebot_extensions.utils import make_readable_filename
+from plugin_shoebot.examples import get_example_dir
+from plugin_shoebot.utils import make_readable_filename
 
 from .preferences import ShoebotPreferences
 

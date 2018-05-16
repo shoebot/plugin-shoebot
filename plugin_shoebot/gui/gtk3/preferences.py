@@ -2,7 +2,8 @@ import itertools
 import os
 from distutils.spawn import find_executable as which
 
-from shoebot_extensions.venv import vw_envs, venv_has_script, is_venv
+from plugin_shoebot.venv import virtualenvwrapper_envs, virtualenv_has_script, is_virtualenv
+from gi.repository import Gio, Gtk
 
 
 def load_gsettings():
@@ -46,7 +47,7 @@ class VirtualEnvChooser(Gtk.Box):
 
         all_envs = itertools.chain(
             sys_envs,
-            [[os.path.basename(venv), venv] for venv in vw_envs(filter=venv_has_script('sbot'))],
+            [[os.path.basename(venv), venv] for venv in virtualenvwrapper_envs(filter=virtualenv_has_script('sbot'))],
             [[os.path.basename(venv), venv] for venv in self.user_envs]
         )
 
@@ -120,7 +121,7 @@ class VirtualEnvChooser(Gtk.Box):
             print("Select clicked")
             print("Folder selected: " + dialog.get_filename())
             folder = dialog.get_filename()
-            if is_venv(folder):
+            if is_virtualenv(folder):
                 self.add_virtualenv(folder)
                 dialog.destroy()
             else:

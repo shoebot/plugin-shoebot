@@ -1,10 +1,7 @@
 """
-Utility functions for IDEs and plugins.
+Run Shoebot in a separate process.
 
-The install process should copy this file to the same location as shoebot.
-
-Functions here are expected to work not need shoebot in the library path.
-
+Communication by sending commands over stdin/out.
 """
 from .utils import AsynchronousFileReader
 
