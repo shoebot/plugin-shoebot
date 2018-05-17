@@ -1,3 +1,6 @@
+import os
+import sys
+
 from plugin_shoebot.install.plugin import PluginInstaller
 
 
@@ -26,6 +29,10 @@ class PeasPlugin(PluginInstaller):
         ('{plugin_shoebot}', '{plugins_dir}/plugin_shoebot'),
         ('{plugin_data}/shoebot.plugin', '{plugins_dir}'),
         ('{plugin_data}/shoebot.lang', '{language_dir}'),
+    ]
+
+    after_copy = [
+        lambda self, directories: os.system("glib-compile-schemas {plugins_dir}plugin_shoebot/install/plugin_data\n".format(**directories))
     ]
 
 

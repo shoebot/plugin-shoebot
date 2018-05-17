@@ -12,7 +12,9 @@ def load_gsettings():
 
     here = os.path.dirname(os.path.abspath(__file__))
     # schema_dir=os.path.abspath(os.path.join(here, '../../gedit3-plugin'))
-    schema_dir = here
+    # schema_dir = here
+    ## schema_dir = os.path.join(here, '../../..')
+    schema_dir = os.path.join(here, '../../install/plugin_data')
     schema_source = Gio.SettingsSchemaSource.new_from_directory(schema_dir,
                                                                 Gio.SettingsSchemaSource.get_default(), False)
     schema = Gio.SettingsSchemaSource.lookup(schema_source, schema_id, False)

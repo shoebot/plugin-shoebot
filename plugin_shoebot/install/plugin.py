@@ -39,6 +39,7 @@ class PluginInstaller(object):
     nt_admin_install_dir = r'c:\Program Files\my-plugin'
     """
     vars = []
+    after_copy = []
     target_dirs = ['install_dir']
 
     initial_context = dict(
@@ -102,6 +103,10 @@ class PluginInstaller(object):
 
         return result
 
+    def call_after_copy(self, directories):
+        for f in self.after_copy:
+            f(self, directories)
+
     def copy_files(self):
         paths = self.resolve_dirs()
         paths.update(self.resolve_vars())
@@ -117,3 +122,5 @@ class PluginInstaller(object):
             mkdir_p(_dest)
             recursive_copy(_src, _dest)
             #print('%s => %s' % (src, dest.format(**directories)))
+
+        self.call_after_copy(directories)
