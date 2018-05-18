@@ -8,8 +8,9 @@ from gettext import gettext as _
 import base64
 import os
 
+from plugin_shoebot.examples import get_example_dir
 from plugin_shoebot.gui.gtk3.menu_gio import encode_relpath, mk_examples_menu
-from plugin_shoebot.gui.gtk3.preferences import ShoebotPreferences, sbot_executable
+from plugin_shoebot.gui.gtk3.preferences import ShoebotPreferences, preferences
 from plugin_shoebot.shoebot_wrapper import RESPONSE_REVERTED, CMD_LOAD_BASE64, ShoebotProcess
 
 WINDOW_ACTIONS = [
@@ -127,7 +128,7 @@ class ShoebotPlugin(GObject.Object, Gedit.WindowActivatable, PeasGtk.Configurabl
             True)  # Switch to the tab
 
     def start_shoebot(self):
-        sbot_bin=sbot_executable()
+        sbot_bin = preferences.preferences.shoebot_executable
         if not sbot_bin:
             textbuffer = self.text.get_buffer()
             textbuffer.set_text('Cannot find sbot in path.')

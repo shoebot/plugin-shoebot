@@ -12,17 +12,24 @@ def find_example_dir():
     Find examples dir .. a little bit ugly..
     """
     # Replace %s with directory to check for shoebot menus.
-    code_stub = textwrap.dedent("""
+    paths = [
+        'share/shoebot/examples',  # default
+        'examples/',               # user installed shoebot with -e
+    ]
+    code = textwrap.dedent("""
     from pkg_resources import resource_filename, Requirement, DistributionNotFound
-    try:
-        print(resource_filename(Requirement.parse('shoebot'), '%s'))
-    except DistributionNotFound:
-        pass
-
-    """)
+    
+    for path in {paths}:
+        try:
+            res_path = resource_filename(Requirement.parse('shoebot'), path)
+            if isdir(res_path):
+                print(res_path)
+                break
+        except DistributionNotFound:
+            pass
+    """.format(paths=paths))
 
     # Needs to run in same python env as shoebot (may be different to gedits)
-    code = code_stub % 'share/shoebot/examples'
     cmd = ["python", "-c", code]
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output, errors = p.communicate()
@@ -31,16 +38,6 @@ def find_example_dir():
         print('Errors:\n{0}'.format(errors.decode('utf-8')))
         return None
     else:
-        examples_dir = output.decode('utf-8').strip()
-        if os.path.isdir(examples_dir):
-            return examples_dir
-
-        # If user is running 'setup.py develop' then examples could be right here
-        # code = "from pkg_resources import resource_filename, Requirement; print resource_filename(Requirement.parse('shoebot'), 'examples/')"
-        code = code_stub % 'examples/'
-        cmd = ["python", "-c", code]
-        p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-        output, errors = p.communicate()
         examples_dir = output.decode('utf-8').strip()
         if os.path.isdir(examples_dir):
             return examples_dir

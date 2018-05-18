@@ -3,6 +3,7 @@ import os
 
 from gi.repository import Gio
 from plugin_shoebot.examples import get_example_dir
+from plugin_shoebot.utils import make_readable_filename
 
 
 def encode_relpath(rel_path):
@@ -38,7 +39,7 @@ def mk_examples_menu(text, root_dir=None, depth=0):
 
             file_actions.extend(sm_file_actions)
         elif os.path.splitext(path)[1] in ['.bot', '.py'] and not fn.startswith('_'):
-            label = ide_utils.make_readable_filename(fn)
+            label = make_readable_filename(fn)
 
             # the only way I could work out to attach the data to the menu item is in the name :/
             action_name = "win.open_example__%s" % encode_relpath(rel_path)
