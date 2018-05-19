@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- http://zderadicka.eu/gsettings-flexible-configuration-system/ -->
 <schemalist>
- 
+
   <schema id="apps.shoebot.gedit"  path="/apps/shoebot/gedit/">
 
     <key type="s" name="current-virtualenv">
@@ -9,7 +9,7 @@
         <summary>Python Interpreter</summary>
         <description>"python" will use first python in PATH</description>
     </key>
-  
+
     <key name="virtualenvs" type="as">
         <default>[]</default>
         <summary>User Added Python Interpreters</summary>
@@ -19,7 +19,7 @@
     <key type="b" name="live-code">
       <default>false</default>
       <summary>Enable Live Code</summary>
-      <description>Experimenal Live Code Mode.</description>
+      <description>Code will be sent to Shoebot as it is edited.</description>
     </key>
 
   </schema>
