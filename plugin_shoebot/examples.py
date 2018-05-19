@@ -3,11 +3,7 @@ import subprocess
 import textwrap
 
 
-def get_example_dir():
-    return _example_dir
-
-
-def find_example_dir():
+def find_example_dir(python="python"):
     """
     Find examples dir .. a little bit ugly..
     """
@@ -17,6 +13,7 @@ def find_example_dir():
         'examples/',               # user installed shoebot with -e
     ]
     code = textwrap.dedent("""
+    from os.path import isdir
     from pkg_resources import resource_filename, Requirement, DistributionNotFound
     
     for path in {paths}:
@@ -30,7 +27,7 @@ def find_example_dir():
     """.format(paths=paths))
 
     # Needs to run in same python env as shoebot (may be different to gedits)
-    cmd = ["python", "-c", code]
+    cmd = [python, "-c", code]
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output, errors = p.communicate()
     if errors:
@@ -46,6 +43,3 @@ def find_example_dir():
             print('Shoebot could not find examples at: {0}'.format(examples_dir))
         else:
             print('Shoebot could not find install dir and examples.')
-
-
-_example_dir = find_example_dir()

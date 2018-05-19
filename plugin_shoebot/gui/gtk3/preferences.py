@@ -4,6 +4,7 @@ from distutils.spawn import find_executable as which
 from gi.repository import Gio, Gtk
 
 from plugin_shoebot import PLUGIN_DIRECTORY
+from plugin_shoebot.examples import find_example_dir
 from plugin_shoebot.venv_chooser import VirtualEnvChooser
 
 
@@ -54,6 +55,14 @@ class Preferences:
         self.venv = gsettings.get_string('current-virtualenv')
         self.shoebot_executable = find_shoebot_exe(self.venv)
 
+    @property
+    def example_dir(self):
+        directory = find_example_dir(self.python)
+        return directory
+
+    @property
+    def python(self):
+        return os.path.join(self.venv, 'bin', 'python')
 
 preferences = Preferences()
 

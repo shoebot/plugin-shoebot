@@ -8,7 +8,6 @@ from gettext import gettext as _
 import base64
 import os
 
-from plugin_shoebot.examples import get_example_dir
 from plugin_shoebot.gui.gtk3.menu_gio import encode_relpath, mk_examples_menu
 from plugin_shoebot.gui.gtk3.preferences import ShoebotPreferences, preferences
 from plugin_shoebot.shoebot_wrapper import RESPONSE_REVERTED, CMD_LOAD_BASE64, ShoebotProcess
@@ -112,7 +111,7 @@ class ShoebotPlugin(GObject.Object, Gedit.WindowActivatable, PeasGtk.Configurabl
     def on_open_example(self, action, user_data):
         b64_path = action.get_name()[len('open_example__'):].encode("UTF-8")
 
-        example_dir = get_example_dir()
+        example_dir = preferences.preferences.example_dir
         rel_path = base64.b64decode(b64_path).decode("UTF-8")
         path = os.path.join(example_dir, rel_path)
 
