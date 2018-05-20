@@ -64,6 +64,7 @@ class Preferences:
     def python(self):
         return os.path.join(self.venv, 'bin', 'python')
 
+
 preferences = Preferences()
 
 

@@ -1,8 +1,11 @@
+import functools
 import os
 import subprocess
+import sys
 import textwrap
 
 
+@functools.lru_cache(maxsize=1)
 def find_example_dir(python="python"):
     """
     Find examples dir .. a little bit ugly..
@@ -31,8 +34,8 @@ def find_example_dir(python="python"):
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output, errors = p.communicate()
     if errors:
-        print('Shoebot experienced errors searching for install and examples.')
-        print('Errors:\n{0}'.format(errors.decode('utf-8')))
+        sys.stderr.write('Shoebot experienced errors searching for install and examples.')
+        sys.stderr.write('Errors:\n{0}'.format(errors.decode('utf-8')))
         return None
     else:
         examples_dir = output.decode('utf-8').strip()
@@ -40,6 +43,6 @@ def find_example_dir(python="python"):
             return examples_dir
 
         if examples_dir:
-            print('Shoebot could not find examples at: {0}'.format(examples_dir))
+            sys.stderr.write('Shoebot could not find examples at: {0}'.format(examples_dir))
         else:
-            print('Shoebot could not find install dir and examples.')
+            sys.stderr.write('Shoebot could not find install dir and examples.')

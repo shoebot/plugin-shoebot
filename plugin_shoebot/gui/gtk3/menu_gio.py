@@ -2,7 +2,7 @@ import base64
 import os
 
 from gi.repository import Gio
-from plugin_shoebot.gui.gtk3 import preferences
+from plugin_shoebot.gui.gtk3.preferences import preferences
 from plugin_shoebot.utils import make_readable_filename
 
 
@@ -17,7 +17,7 @@ def mk_examples_menu(text, root_dir=None, depth=0):
     :return: base_item, rel_paths
     """
     # 3.12+ menus
-    examples_dir = preferences.preferences.example_dir
+    examples_dir = preferences.example_dir
     if not examples_dir:
         return None, []
 

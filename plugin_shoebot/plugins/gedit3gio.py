@@ -111,7 +111,7 @@ class ShoebotPlugin(GObject.Object, Gedit.WindowActivatable, PeasGtk.Configurabl
     def on_open_example(self, action, user_data):
         b64_path = action.get_name()[len('open_example__'):].encode("UTF-8")
 
-        example_dir = preferences.preferences.example_dir
+        example_dir = preferences.example_dir
         rel_path = base64.b64decode(b64_path).decode("UTF-8")
         path = os.path.join(example_dir, rel_path)
 
@@ -120,14 +120,14 @@ class ShoebotPlugin(GObject.Object, Gedit.WindowActivatable, PeasGtk.Configurabl
         gio_file = Gio.file_new_for_uri(uri)
         self.window.create_tab_from_location(
             gio_file,
-            None,  # encoding
+            None,   # encoding
             0,
-            0,     # column
-            False, # Do not create an empty file
-            True)  # Switch to the tab
+            0,      # column
+            False,  # Do not create an empty file
+            True)   # Switch to the tab
 
     def start_shoebot(self):
-        sbot_bin = preferences.preferences.shoebot_executable
+        sbot_bin = preferences.shoebot_executable
         if not sbot_bin:
             textbuffer = self.text.get_buffer()
             textbuffer.set_text('Cannot find sbot in path.')
