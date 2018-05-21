@@ -54,7 +54,7 @@ def examples_menu(root_dir=None, depth=0):
     for fn in sorted(os.listdir(root_dir)):
         path = os.path.join(root_dir, fn)
         rel_path = path[len(examples_dir):]
-        if os.path.isdir(path):
+        if fn != '__pycache__' and os.path.isdir(path):
             action = 'ShoebotExampleMenu {0}'.format(rel_path)
             label = fn.capitalize()
 
