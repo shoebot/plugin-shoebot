@@ -1,0 +1,25 @@
+Metadata-Version: 2.0
+Name: asynchronousfilereader
+Version: 0.2.1
+Summary: Simple thread based asynchronous file reader
+Home-page: https://github.com/soxofaan/asynchronousfilereader
+Author: Stefaan Lippens
+Author-email: soxofaan@gmail.com
+License: MIT
+Keywords: async asynchronous threading
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 2.6
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.1
+Classifier: Programming Language :: Python :: 3.2
+Classifier: Programming Language :: Python :: 3.3
+
+AsynchronousFileReader is a simple thread based way to read
+one or multiple files in an asynchronous way.
+
+

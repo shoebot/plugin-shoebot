@@ -1,0 +1,3 @@
+[submodule "vendor/asynchronousfilereader"]
+	path = vendor/asynchronousfilereader
+	url = https://github.com/soxofaan/asynchronousfilereader

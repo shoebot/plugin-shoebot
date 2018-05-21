@@ -82,7 +82,9 @@ setup(
     author='Stuart Axon',
     author_email='stu.axon@gmail.com',
     description=description,
-    packages=find_packages(),
+    #packages=find_packages(),
+    packages=['plugin_shoebot'],
+    package_dir={'plugin_shoebot': 'plugin_shoebot', 'plugin_shoebot._vendored.asyncronousfilereader': 'vendor/asynchronousfilereader/asynchronousfilereader'},
     cmdclass={
         'clean': CleanCommand,
         'install': InstallCommand
