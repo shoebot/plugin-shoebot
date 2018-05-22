@@ -1,6 +1,6 @@
 import os
-import sys
 
+from plugin_shoebot.install import register_plugin
 from plugin_shoebot.install.plugin import PluginInstaller
 
 
@@ -44,5 +44,5 @@ class GioGeditPlugin(PeasPlugin):
     app_major_version = 'gedit-3'
 
 
-plugin = GioGeditPlugin()
-plugin.copy_files()
+def register_plugins():
+    register_plugin('gedit', GioGeditPlugin)

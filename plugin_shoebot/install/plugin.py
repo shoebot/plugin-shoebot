@@ -107,20 +107,25 @@ class PluginInstaller(object):
         for f in self.after_copy:
             f(self, directories)
 
-    def copy_files(self):
+    def resolve_all(self):
         paths = self.resolve_dirs()
         paths.update(self.resolve_vars())
-        directories = paths
+        return paths
 
+    def src_dests(self, targets):
         for src, dest in self.copy:
-            print(src, dest)
-            _src = src.format(**directories)
-            _dest = dest.format(**directories)
-            #print(_dest)
-            print(_dest)
+            _src = src.format(**targets)
+            _dest = dest.format(**targets)
+            yield _src, _dest
 
-            mkdir_p(_dest)
-            recursive_copy(_src, _dest)
-            #print('%s => %s' % (src, dest.format(**directories)))
+    def copy_files(self):
+        targets = self.resolve_all()
+        for src, dest in self.src_dests(targets):
+            mkdir_p(dest)
+            recursive_copy(src, dest)
 
-        self.call_after_copy(directories)
+        self.call_after_copy(targets)
+
+    def get_outputs(self):
+        for src, dest in self.src_dests():
+            yield dest

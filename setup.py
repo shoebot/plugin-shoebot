@@ -5,6 +5,8 @@ import os
 import shutil
 import sys
 
+from plugin_shoebot.install import plugins
+
 description = 'Integrate and control shoebot from editors or anything else',
 here = os.path.dirname(os.path.abspath(__file__))
 
@@ -17,8 +19,9 @@ except ImportError:
 
 class InstallCommand(install):
     """Customized setuptools install command - prints a friendly greeting."""
-    ALL_PLUGINS = {'gedit'}
     description = "Installs plugin-shoebot"
+
+    available_plugins = set(plugins)
 
     user_options = install.user_options + [
         ('plugins=', None, 'Install gedit plugin.'),
@@ -28,17 +31,25 @@ class InstallCommand(install):
         self.plugins = None
         install.initialize_options(self)
 
+    def get_outputs(self):
+        outputs = []
+        from plugin_shoebot.install import plugins
+        for name, plugin_klass in plugins.items():
+            plugin = plugin_klass()
+            outputs.extend(plugin.get_outputs())
+        return outputs
+
     def finalize_options(self):
         if self.plugins is None:
-            self.plugins = InstallCommand.ALL_PLUGINS
+            self.plugins = InstallCommand.available_plugins
         else:
             self.plugins = set(self.plugins.split())
             if 'all' in self.plugins:
                 self.plugins.pop('all')
-                self.plugins.update(InstallCommand.ALL_PLUGINS)
-            if not self.plugins.issubset(InstallCommand.ALL_PLUGINS):
-                valid_plugins = ' '.join(InstallCommand.ALL_PLUGINS)
-                invalid_plugins = ' '.join(self.plugins.difference(InstallCommand.ALL_PLUGINS))
+                self.plugins.update(InstallCommand.available_plugins)
+            if not self.plugins.issubset(InstallCommand.available_plugins):
+                valid_plugins = ' '.join(InstallCommand.available_plugins)
+                invalid_plugins = ' '.join(self.plugins.difference(InstallCommand.available_plugins))
                 sys.stderr.write('Invalid plugins specified: "%s", valid plugins: "%s"\n' % (invalid_plugins, valid_plugins))
                 sys.exit(1)
         for plugin in self. plugins:
@@ -46,9 +57,11 @@ class InstallCommand(install):
         install.finalize_options(self)
 
     def run(self):
-        print(self.plugins)
-        print("Hello, developer, how are you? :)")
-        install.run(self)
+        from plugin_shoebot.install import plugins
+        for name, plugin_klass in plugins.items():
+            plugin = plugin_klass()
+            plugin.copy_files()
+
 
 class CleanCommand(Command):
     """Custom clean command to tidy up the project root."""
@@ -82,9 +95,7 @@ setup(
     author='Stuart Axon',
     author_email='stu.axon@gmail.com',
     description=description,
-    #packages=find_packages(),
-    packages=['plugin_shoebot'],
-    package_dir={'plugin_shoebot': 'plugin_shoebot', 'plugin_shoebot._vendored.asyncronousfilereader': 'vendor/asynchronousfilereader/asynchronousfilereader'},
+    packages=find_packages(),
     cmdclass={
         'clean': CleanCommand,
         'install': InstallCommand
