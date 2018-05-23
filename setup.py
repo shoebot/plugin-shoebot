@@ -4,17 +4,25 @@ import glob
 import os
 import shutil
 import sys
+stdout = sys.stdout
+stderr = sys.stderr
 
-from plugin_shoebot.install import plugins
+from plugin_shoebot.install import plugins, get_plugin_outputs, install_plugins
 
 description = 'Integrate and control shoebot from editors or anything else',
 here = os.path.dirname(os.path.abspath(__file__))
 
 try:
-    from setuptools import setup, Command, find_packages
+    from setuptools import setup, Command, find_packages, Distribution
     from setuptools.command.install import install
+    from distutils.command.clean import clean
 except ImportError:
     sys.exit("Install setuptools before plugin-shoebot")
+
+
+class BinaryDistribution(Distribution):
+    def has_ext_modules(self):
+        return True
 
 
 class InstallCommand(install):
@@ -32,12 +40,7 @@ class InstallCommand(install):
         install.initialize_options(self)
 
     def get_outputs(self):
-        outputs = []
-        from plugin_shoebot.install import plugins
-        for name, plugin_klass in plugins.items():
-            plugin = plugin_klass()
-            outputs.extend(plugin.get_outputs())
-        return outputs
+        return get_plugin_outputs()
 
     def finalize_options(self):
         if self.plugins is None:
@@ -52,31 +55,28 @@ class InstallCommand(install):
                 invalid_plugins = ' '.join(self.plugins.difference(InstallCommand.available_plugins))
                 sys.stderr.write('Invalid plugins specified: "%s", valid plugins: "%s"\n' % (invalid_plugins, valid_plugins))
                 sys.exit(1)
-        for plugin in self. plugins:
-            pass
         install.finalize_options(self)
 
     def run(self):
-        from plugin_shoebot.install import plugins
-        for name, plugin_klass in plugins.items():
-            plugin = plugin_klass()
-            plugin.copy_files()
+        install_plugins(self.plugins)
+        return install.run(self)
 
 
-class CleanCommand(Command):
+class CleanCommand(clean):
     """Custom clean command to tidy up the project root."""
     CLEAN_FILES = './build ./dist ./*.pyc ./*.tgz ./*.egg-info'.split(' ')
 
-    user_options = []
+    user_options = clean.user_options
 
     def initialize_options(self):
-        pass
+        return clean.initialize_options(self)
 
     def finalize_options(self):
-        pass
+        return clean.finalize_options(self)
 
     def run(self):
         global here
+        clean.run(self)
 
         for path_spec in self.CLEAN_FILES:
             # Make paths absolute and relative to this path
@@ -89,6 +89,7 @@ class CleanCommand(Command):
                 shutil.rmtree(path)
 
 setup(
+    # zip_safe=False,
     name='plugin_shoebot',
     version='0.1.0',
     url='https://github.com/shoebot/plugin-shoebot.git',
@@ -97,7 +98,7 @@ setup(
     description=description,
     packages=find_packages(),
     cmdclass={
-        'clean': CleanCommand,
+        # 'clean': CleanCommand,
         'install': InstallCommand
     },
 )
