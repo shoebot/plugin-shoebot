@@ -98,7 +98,7 @@ setup(
     description=description,
     packages=find_packages(),
     cmdclass={
-        # 'clean': CleanCommand,
+        'clean': CleanCommand,
         'install': InstallCommand
     },
 )
