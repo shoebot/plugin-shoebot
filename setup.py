@@ -6,7 +6,6 @@ import shutil
 import sys
 
 from setuptools.command.easy_install import easy_install
-
 from plugin_shoebot.install import get_plugin_outputs, install_plugins, parse_plugin_names
 
 description = 'Integrate and control shoebot from editors or anything else',
@@ -99,7 +98,6 @@ class CleanCommand(clean):
 
 
 setup(
-    # zip_safe=False,
     name='plugin_shoebot',
     version='0.1.0',
     url='https://github.com/shoebot/plugin-shoebot.git',
