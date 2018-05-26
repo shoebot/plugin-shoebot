@@ -3,7 +3,6 @@
 This library provides utilities to use shoebot from editors and other programs.
 
 
-
 # Plugins
 
 Plugins built with the plugin_shoebot API
@@ -12,9 +11,8 @@ Plugins built with the plugin_shoebot API
 
 As well as the Shoebot IDE in the main shoebot repo, plugins are provided:
 
-gedit (various versions)
+gedit 3.12 and up.
 
-scite
 
 # API
 
@@ -23,6 +21,7 @@ scite
 
 Run shoebot in a subprocess.
 
+
 ## Communicate with running shoebot
 
 - Pause execution
@@ -30,7 +29,7 @@ Run shoebot in a subprocess.
 - Quit
 
 
-## Editor support widgets````
+## Editor support widgets
 
 ### Menus
 
@@ -39,12 +38,14 @@ APIs to create menus
 - Examples:  Launch any shoebot example.
 - Toggle options: Fullscreen, Show Variables, Enable Livecoding
 
+
 ### Preferences
 
 Store preferences:
 
 - Fullscreen
 - Enable Livecoding
+
 
 ### Virtualenvs
 

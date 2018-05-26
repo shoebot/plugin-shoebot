@@ -20,7 +20,7 @@ def parse_plugin_names(names_str):
         plugin_names = set(names_str.split())
         if 'all' in plugin_names:
             plugin_names = set(plugins.keys())
-        if not self.plugins.issubset(available_plugins):
+        if not plugin_names.issubset(available_plugins):
             valid_plugins = ' '.join(available_plugins)
             invalid_plugins = ' '.join(plugin_names.difference(available_plugins))
             sys.stderr.write(
