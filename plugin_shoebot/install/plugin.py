@@ -127,5 +127,6 @@ class PluginInstaller(object):
         self.call_after_copy(targets)
 
     def get_outputs(self):
-        for src, dest in self.src_dests():
+        targets = self.resolve_all()
+        for src, dest in self.src_dests(targets):
             yield dest
