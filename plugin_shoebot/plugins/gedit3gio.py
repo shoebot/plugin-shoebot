@@ -290,6 +290,7 @@ class ShoebotPluginMenu(GObject.Object, Gedit.AppActivatable):
     def __init__(self):
         GObject.Object.__init__(self)
         self.shoebot_menu = None
+        self.tools_menu_ext = None
 
     def do_activate(self):
         global _
@@ -327,3 +328,5 @@ class ShoebotPluginMenu(GObject.Object, Gedit.AppActivatable):
     def do_deactivate(self):
         for name, accel in WINDOW_ACCELS:
             self.app.set_accels_for_action("win.on_%s" % name, ())
+        self.tools_menu_ext = None
+        self.shoebot_menu = None
