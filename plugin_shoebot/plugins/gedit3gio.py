@@ -325,4 +325,5 @@ class ShoebotPluginMenu(GObject.Object, Gedit.AppActivatable):
         self.tools_menu_ext.append_menu_item(base)
 
     def do_deactivate(self):
-        pass
+        for name, accel in WINDOW_ACCELS:
+            self.app.set_accels_for_action("win.on_%s" % name, ())
