@@ -2,15 +2,14 @@
 Plugin Gedit 3.12+ using gio based menus.
 """
 
-from gi.repository import Gtk, GLib, Gio, GObject, Gedit, Pango, PeasGtk
-from gettext import gettext as _
-
 import base64
 import os
 
+from gi.repository import Gtk, GLib, Gio, GObject, Gedit, Pango, PeasGtk
+
 from plugin_shoebot.gui.gtk3.menu_gio import encode_relpath, mk_examples_menu
 from plugin_shoebot.gui.gtk3.preferences import ShoebotPreferences, preferences
-from plugin_shoebot.shoebot_wrapper import RESPONSE_REVERTED, CMD_LOAD_BASE64, ShoebotProcess
+from plugin_shoebot.shoebot_wrapper import RESPONSE_CODE_OK, RESPONSE_REVERTED, CMD_LOAD_BASE64, ShoebotProcess
 
 WINDOW_ACTIONS = [
     (_("Run in Shoebot"), "run")
@@ -26,7 +25,7 @@ WINDOW_TOGGLES = [  # these are accompanied by vars e.g.   window.socket_server_
 
 WINDOW_ACCELS = [("run", "<Control>R")]
 
-EXAMPLES=[]
+EXAMPLES = []
 
 
 class ShoebotPlugin(GObject.Object, Gedit.WindowActivatable, PeasGtk.Configurable):
@@ -120,11 +119,11 @@ class ShoebotPlugin(GObject.Object, Gedit.WindowActivatable, PeasGtk.Configurabl
         gio_file = Gio.file_new_for_uri(uri)
         self.window.create_tab_from_location(
             gio_file,
-            None,   # encoding
+            None,  # encoding
             0,
-            0,      # column
+            0,  # column
             False,  # Do not create an empty file
-            True)   # Switch to the tab
+            True)  # Switch to the tab
 
     def start_shoebot(self):
         sbot_bin = preferences.shoebot_executable
@@ -132,7 +131,7 @@ class ShoebotPlugin(GObject.Object, Gedit.WindowActivatable, PeasGtk.Configurabl
             textbuffer = self.text.get_buffer()
             textbuffer.set_text('Cannot find sbot in path.')
             while Gtk.events_pending():
-               Gtk.main_iteration()
+                Gtk.main_iteration()
             return False
 
         if self.bot and self.bot.process.poll() == None:
@@ -156,7 +155,7 @@ class ShoebotPlugin(GObject.Object, Gedit.WindowActivatable, PeasGtk.Configurabl
         textbuffer.set_text('running shoebot at %s\n' % sbot_bin)
 
         while Gtk.events_pending():
-           Gtk.main_iteration()
+            Gtk.main_iteration()
 
         self.disconnect_change_handler(doc)
         self.changed_handler_id = doc.connect("changed", self.doc_changed)
@@ -276,7 +275,6 @@ class ShoebotPlugin(GObject.Object, Gedit.WindowActivatable, PeasGtk.Configurabl
         action.set_state(GLib.Variant.new_boolean(not action.get_state()))
         self.verbose_output_enabled = action.get_state().get_boolean()
 
-
     def do_deactivate(self):
         self.panel.remove(self.live_container)
         self.panel.remove(self.output_container)
@@ -295,6 +293,7 @@ class ShoebotPluginMenu(GObject.Object, Gedit.AppActivatable):
 
     def do_activate(self):
         global _
+
         def mk_menu(text):
             global _
             menu = Gio.Menu.new()
