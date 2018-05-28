@@ -3,7 +3,7 @@ Run Shoebot in a separate process.
 
 Communication by sending commands over stdin/out.
 """
-from .utils import AsynchronousFileReader
+from plugin_shoebot._vendor.asynchronousfilereader import AsynchronousFileReader
 
 try:
     import queue
@@ -72,7 +72,7 @@ class ShoebotProcess(object):
                 # PYTHONUNBUFFERED='1'
             )
         else:
-            print('no sbot!')
+            sys.err.write('no sbot!\n')
 
         self.process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                         bufsize=1, close_fds=os.name != 'nt', shell=False, cwd=cwd)
@@ -81,39 +81,11 @@ class ShoebotProcess(object):
 
         self.responses = {}
 
-        def response_handler(line):
-            line = line.decode('utf-8').rstrip()
-            for cookie, response in list(self.responses.items()):
-                if line.startswith(cookie):
-                    pattern = r"^" + cookie + "\s?(?P<status>(.*?))[\:>](?P<info>.*)"
-
-                    match = re.match(pattern, line)
-                    d = match.groupdict()
-                    status = d.get('status')
-                    info = d.get('info')
-
-                    if not response.status and status:
-                        self.responses[cookie] = response = \
-                            CommandResponse(response.cmd, cookie, response.status or status, response.info)
-
-                    response.info.append(info)
-
-                    # If delimiter was '>' there are more lines
-                    # If delimiter was ':' request is complete
-                    delimiter = re.match('.*([:>])', line).group(1)
-                    if delimiter == ':':
-                        del self.responses[cookie]
-                        self.response_queue.put_nowait(response)
-
-                    return True  # response was handled
-
         # Launch the asynchronous readers of the process' stdout and stderr.
         self.stdout_queue = queue.Queue()
-        self.stdout_reader = AsynchronousFileReader(self.process.stdout, self.stdout_queue, althandler=response_handler)
-        self.stdout_reader.start()
+        self.stdout_reader = AsynchronousFileReader(self.process.stdout, self.stdout_queue)
         self.stderr_queue = queue.Queue()
         self.stderr_reader = AsynchronousFileReader(self.process.stderr, self.stderr_queue)
-        self.stderr_reader.start()
 
         self.response_queue = queue.Queue()
 
@@ -187,6 +159,36 @@ class ShoebotProcess(object):
         self.process.stderr.close()
         self.running = False
 
+    def filter_command_response(self, line):
+        """
+        :param line: Line from bots stdout
+        :return:  True if the line was part of a response to a command
+        """
+        line = line.rstrip()
+        for cookie, response in list(self.responses.items()):
+            if line.startswith(cookie):
+                pattern = r"^" + cookie + "\s?(?P<status>(.*?))[\:>](?P<info>.*)"
+
+                match = re.match(pattern, line)
+                d = match.groupdict()
+                status = d.get('status')
+                info = d.get('info')
+
+                if not response.status and status:
+                    self.responses[cookie] = response = \
+                        CommandResponse(response.cmd, cookie, response.status or status, response.info)
+
+                response.info.append(info)
+
+                # If delimiter was '>' there are more lines
+                # If delimiter was ':' request is complete
+                delimiter = re.match('.*([:>])', line).group(1)
+                if delimiter == ':':
+                    del self.responses[cookie]
+                    self.response_queue.put_nowait(response)
+
+                return True  # response was handled
+
     def get_output(self):
         """
         :yield: stdout_line, stderr_line, running
@@ -203,6 +205,9 @@ class ShoebotProcess(object):
         while not (self.stdout_queue.empty() and self.stderr_queue.empty()):
             if not self.stdout_queue.empty():
                 line = self.stdout_queue.get().decode('utf-8')
+                if self.filter_command_response(line):
+                    continue
+
                 yield line, None
 
             if not self.stderr_queue.empty():

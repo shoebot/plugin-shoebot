@@ -99,7 +99,7 @@ class CleanCommand(clean):
 
 setup(
     name='plugin_shoebot',
-    version='0.1.4',
+    version='0.1.6',
     url='https://github.com/shoebot/plugin-shoebot.git',
     author='Stuart Axon',
     author_email='stu.axon@gmail.com',
