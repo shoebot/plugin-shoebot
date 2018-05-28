@@ -5,6 +5,7 @@ Plugin Gedit 3.12+ using gio based menus.
 import base64
 import errno
 import os
+import sys
 
 from gi.repository import Gtk, GLib, Gio, GObject, Gedit, Pango, PeasGtk
 
@@ -136,7 +137,6 @@ class ShoebotPlugin(GObject.Object, Gedit.WindowActivatable, PeasGtk.Configurabl
             return False
 
         if self.bot and self.bot.process.poll() == None:
-            print('Sending quit.')
             self.bot.send_command("quit")
 
         # get the text buffer
@@ -205,7 +205,7 @@ class ShoebotPlugin(GObject.Object, Gedit.WindowActivatable, PeasGtk.Configurabl
                 self.disconnect_change_handler()
                 if e.errno == errno.EPIPE:
                     # EPIPE error
-                    print('FIXME: %s' % str(e))
+                    sys.write('FIXME: %s\n' % str(e))
                 else:
                     # Something else bad happened
                     raise
