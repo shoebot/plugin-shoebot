@@ -293,7 +293,7 @@ class ShoebotPluginMenu(GObject.Object, Gedit.AppActivatable):
         self.shoebot_menu = None
         self.tools_menu_ext = None
 
-    def build_menu(self):
+    def build_menu(self, menu_name=_("Shoebot")):
         global _
 
         def mk_menu(text):
@@ -317,7 +317,7 @@ class ShoebotPluginMenu(GObject.Object, Gedit.AppActivatable):
 
             return item, menu
 
-        base, menu = mk_menu(_("Shoebot"))
+        base, menu = mk_menu(menu_name)
         return base
 
     def do_activate(self):
