@@ -3,6 +3,7 @@ Plugin Gedit 3.12+ using gio based menus.
 """
 
 import base64
+import errno
 import os
 
 from gi.repository import Gtk, GLib, Gio, GObject, Gedit, Pango, PeasGtk
