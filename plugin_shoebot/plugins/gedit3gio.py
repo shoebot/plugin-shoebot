@@ -8,7 +8,7 @@ import os
 
 from gi.repository import Gtk, GLib, Gio, GObject, Gedit, Pango, PeasGtk
 
-from plugin_shoebot.gui.gtk3.menu_gio import encode_relpath, mk_examples_menu
+from plugin_shoebot.gui.gtk3.menu_gio import encode_relpath, example_menu_actions
 from plugin_shoebot.gui.gtk3.preferences import ShoebotPreferences, preferences
 from plugin_shoebot.shoebot_wrapper import RESPONSE_CODE_OK, RESPONSE_REVERTED, CMD_LOAD_BASE64, ShoebotProcess
 
@@ -301,7 +301,7 @@ class ShoebotPluginMenu(GObject.Object, Gedit.AppActivatable):
             menu = Gio.Menu.new()
             item = Gio.MenuItem.new_submenu(text, menu)
 
-            examples_item, examples = mk_examples_menu(_("E_xamples"))
+            examples_item, examples = example_menu_actions(_("E_xamples"))
 
             if examples and not EXAMPLES:
                 # if examples is None, examples were not found.

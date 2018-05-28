@@ -12,9 +12,12 @@ def encode_relpath(rel_path):
     return b64_path
 
 
-def mk_examples_menu(text, root_dir=None, depth=0):
+def example_menu_actions(text, root_dir=None, depth=0):
     """
-    :return: base_item, rel_paths
+    Traverse examples directory and get relative filenames
+    and relative filenames
+
+    :return: base_item, [rel_paths...]
     """
     # 3.12+ menus
     examples_dir = preferences.example_dir
@@ -34,7 +37,7 @@ def mk_examples_menu(text, root_dir=None, depth=0):
         if os.path.isdir(path):
             label = fn.capitalize()
 
-            item, sm_file_actions = mk_examples_menu(label, os.path.join(root_dir, fn))
+            item, sm_file_actions = example_menu_actions(label, os.path.join(root_dir, fn))
             menu.append_item(item)
 
             file_actions.extend(sm_file_actions)
