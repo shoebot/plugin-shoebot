@@ -32,8 +32,10 @@ MENU_UI = """
 """
 
 
-def examples_menu(root_dir=None, depth=0):
+def example_menu_xml(root_dir=None, depth=0):
     """
+    Build gaction menu xml for examples.
+
     :return: xml for menu, [(bot_action, label), ...], [(menu_action, label), ...]
     """
     # pre 3.12 menus
@@ -58,7 +60,7 @@ def examples_menu(root_dir=None, depth=0):
             action = 'ShoebotExampleMenu {0}'.format(rel_path)
             label = fn.capitalize()
 
-            sm_xml, sm_file_actions, sm_menu_actions = examples_menu(os.path.join(root_dir, fn), depth + 1)
+            sm_xml, sm_file_actions, sm_menu_actions = example_menu_xml(os.path.join(root_dir, fn), depth + 1)
 
             submenu_actions.extend(sm_menu_actions)
             file_actions.extend(sm_file_actions)
@@ -74,9 +76,9 @@ def examples_menu(root_dir=None, depth=0):
     return xml, file_actions, submenu_actions
 
 
-def gedit3_menu(xml):
+def menu_xml(xml):
     """
-    Build XML for GEDIT3 Menus.
+    Build XML entire menu.
 
     Pass in the xml returned by example_menu
     """
