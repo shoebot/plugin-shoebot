@@ -294,30 +294,23 @@ class ShoebotPluginMenu(GObject.Object, Gedit.AppActivatable):
         self.tools_menu_ext = None
 
     def build_menu(self, menu_name=_("Shoebot")):
-        global _
+        menu = Gio.Menu.new()
+        base = Gio.MenuItem.new_submenu(menu_name, menu)
 
-        def mk_menu(text):
-            global _
-            menu = Gio.Menu.new()
-            item = Gio.MenuItem.new_submenu(text, menu)
+        examples_item, examples = example_menu_actions(_("E_xamples"))
 
-            examples_item, examples = example_menu_actions(_("E_xamples"))
+        if examples and not EXAMPLES:
+            # if examples is None, examples were not found.
+            EXAMPLES.extend(examples)
+            menu.append_item(examples_item)
 
-            if examples and not EXAMPLES:
-                # if examples is None, examples were not found.
-                EXAMPLES.extend(examples)
-                menu.append_item(examples_item)
+        for menu_name, name in WINDOW_ACTIONS:
+            menu.append(menu_name, "win.on_%s" % name)
 
-            for text, name in WINDOW_ACTIONS:
-                menu.append(text, "win.on_%s" % name)
+        for menu_name, name, toggled in WINDOW_TOGGLES:
+            action_name = "win.toggle_%s" % name
+            menu.append(menu_name, action_name)
 
-            for text, name, toggled in WINDOW_TOGGLES:
-                action_name = "win.toggle_%s" % name
-                menu.append(text, action_name)
-
-            return item, menu
-
-        base, menu = mk_menu(menu_name)
         return base
 
     def do_activate(self):
