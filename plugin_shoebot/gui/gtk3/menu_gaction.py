@@ -4,32 +4,8 @@ Gtk3 support for shoebot in editors and IDEs
 
 import os
 
-from gi.repository import Gtk
-from plugin_shoebot.examples import get_example_dir
+from plugin_shoebot.gui.gtk3.preferences import preferences
 from plugin_shoebot.utils import make_readable_filename
-
-from .preferences import ShoebotPreferences
-
-MENU_UI = """
-<ui>
-  <menubar name="MenuBar">
-    <menu name="ShoebotMenu" action="Shoebot">
-      <placeholder name="ShoebotOps_1">
-        <menuitem name="Run in Shoebot" action="ShoebotRun"/>
-            <separator/>
-                 <menu name="ShoebotExampleMenu" action="ShoebotOpenExampleMenu">
-                    {0}
-                </menu>
-        <separator/>
-        <menuitem name="Enable Socket Server" action="ShoebotSocket"/>
-        <menuitem name="Show Variables Window" action="ShoebotVarWindow"/>
-        <menuitem name="Go Fullscreen" action="ShoebotFullscreen"/>
-        <menuitem name="Live Code" action="ShoebotLive"/>
-      </placeholder>
-    </menu>
-  </menubar>
-</ui>
-"""
 
 
 def example_menu_xml(root_dir=None, depth=0):
@@ -38,8 +14,8 @@ def example_menu_xml(root_dir=None, depth=0):
 
     :return: xml for menu, [(bot_action, label), ...], [(menu_action, label), ...]
     """
-    # pre 3.12 menus
-    examples_dir = get_example_dir()
+    # GAction (Gedit pre 3.12 menus)
+    examples_dir = preferences.example_dir
     if not examples_dir:
         return "", [], []
 
@@ -74,22 +50,3 @@ def example_menu_xml(root_dir=None, depth=0):
             file_actions.append((action, label))
 
     return xml, file_actions, submenu_actions
-
-
-def menu_xml(xml):
-    """
-    Build XML entire menu.
-
-    Pass in the xml returned by example_menu
-    """
-    # pre 3.12 menus
-    return MENU_UI.format(xml)  # Splice in the examples menu
-
-
-if __name__ == '__main__':
-    # Debug - create the configuration
-    win = Gtk.Window()
-    win.add(ShoebotPreferences())
-    win.connect("delete-event", Gtk.main_quit)
-    win.show_all()
-    Gtk.main()

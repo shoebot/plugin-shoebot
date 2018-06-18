@@ -1,19 +1,26 @@
-import functools
 import os
 import subprocess
 import sys
 import textwrap
 
+try:
+    from functools import lru_cache
+except ImportError:
+    from functools32 import lru_cache
 
-@functools.lru_cache(maxsize=1)
-def find_example_dir(python="python"):
+
+@lru_cache(maxsize=1)
+def find_example_dir(python):
     """
     Find examples dir .. a little bit ugly..
     """
     # Replace %s with directory to check for shoebot menus.
     paths = [
-        'share/shoebot/examples',  # default
-        'examples/',               # user installed shoebot with -e
+        path.format(sys_prefix=sys.prefix, cwd=os.getcwd())
+        for path in [
+            'share/shoebot/examples',  # default
+            'examples/',  # user installed shoebot with -e
+        ]
     ]
     code = textwrap.dedent("""
     from os.path import isdir
@@ -34,7 +41,7 @@ def find_example_dir(python="python"):
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output, errors = p.communicate()
     if errors:
-        sys.stderr.write('Shoebot experienced errors searching for install and examples.')
+        sys.stderr.write('Shoebot experienced errors searching for install and examples.\n')
         sys.stderr.write('Errors:\n{0}'.format(errors.decode('utf-8')))
         return None
     else:
@@ -43,6 +50,6 @@ def find_example_dir(python="python"):
             return examples_dir
 
         if examples_dir:
-            sys.stderr.write('Shoebot could not find examples at: {0}'.format(examples_dir))
+            sys.stderr.write('Shoebot could not find examples at: {0}\n'.format(examples_dir))
         else:
-            sys.stderr.write('Shoebot could not find install dir and examples.')
+            sys.stderr.write('Shoebot could not find install dir and examples.\n')

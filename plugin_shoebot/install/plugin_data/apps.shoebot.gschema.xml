@@ -2,25 +2,25 @@
 <!-- http://zderadicka.eu/gsettings-flexible-configuration-system/ -->
 <schemalist>
 
-  <schema id="apps.shoebot.gedit"  path="/apps/shoebot/gedit/">
+    <schema id="apps.shoebot" path="/apps/shoebot/">
 
-    <key type="s" name="current-virtualenv">
-        <default>"python"</default>
-        <summary>Python Interpreter</summary>
-        <description>"python" will use first python in PATH</description>
-    </key>
+        <key type="s" name="current-virtualenv">
+            <default>"python"</default>
+            <summary>Python Interpreter</summary>
+            <description>"python" will use first python in PATH</description>
+        </key>
 
-    <key name="virtualenvs" type="as">
-        <default>[]</default>
-        <summary>User Added Python Interpreters</summary>
-        <description></description>
-    </key>
+        <key name="virtualenvs" type="as">
+            <default>[]</default>
+            <summary>User Added Python Interpreters</summary>
+            <description></description>
+        </key>
 
-    <key type="b" name="live-code">
-      <default>false</default>
-      <summary>Enable Live Code</summary>
-      <description>Code will be sent to Shoebot as it is edited.</description>
-    </key>
+        <key type="b" name="live-code">
+            <default>false</default>
+            <summary>Enable Live Code</summary>
+            <description>Code will be sent to Shoebot as it is edited.</description>
+        </key>
 
-  </schema>
+    </schema>
 </schemalist>

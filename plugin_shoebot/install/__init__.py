@@ -11,7 +11,7 @@ def parse_plugin_names(names_str):
     """
     :param names_str: space separated string of plugin names
     :return: set of plugins
-    :raise: sys.exit if namea are invalid
+    :raise: sys.exit if names don't match those in available_plugins
     """
     available_plugins = set(plugins.keys())
     if names_str is None:

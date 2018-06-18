@@ -1,8 +1,8 @@
 import itertools
 import os
 
-from gi.repository import Gtk
-from plugin_shoebot.venv import virtualenvwrapper_envs, virtualenv_has_script, is_virtualenv
+from gi.repository import GLib, Gtk
+from plugin_shoebot.venv import virtualenvwrapper_envs, virtualenv_has_binary, is_virtualenv
 
 
 class VirtualEnvChooser(Gtk.Box):
@@ -31,7 +31,7 @@ class VirtualEnvChooser(Gtk.Box):
 
         all_envs = itertools.chain(
             sys_envs,
-            [[os.path.basename(venv), venv] for venv in virtualenvwrapper_envs(filter=virtualenv_has_script('sbot'))],
+            [[os.path.basename(venv), venv] for venv in virtualenvwrapper_envs(filter=lambda: virtualenv_has_binary(venv, 'sbot'))],
             [[os.path.basename(venv), venv] for venv in self.user_envs]
         )
 
