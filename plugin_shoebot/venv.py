@@ -8,7 +8,7 @@ PYTHON_BIN = os.path.basename(sys.executable)
 
 def interpreter_environment(python):
     """
-    :param python:  absolute path to python executable
+    :param python:  absolute path to python interpreter
     :return:  path to environment for python
     """
     return dirname(dirname(python))

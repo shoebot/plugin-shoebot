@@ -34,7 +34,7 @@ def load_gsettings():
                                                                 Gio.SettingsSchemaSource.get_default(), False)
     schema = Gio.SettingsSchemaSource.lookup(schema_source, schema_id, False)
     if not schema:
-        raise Exception("Cannot get GSettings  schema")
+        raise Exception("Cannot lookup GSettings schema")
     settings = Gio.Settings.new_full(schema, None, path)
     return settings
 
@@ -57,9 +57,10 @@ class Preferences:
     def __init__(self):
         gsettings = load_gsettings()
         venv = gsettings.get_string('current-virtualenv')
+
         if venv == SYSTEM:
             venv = get_system_environment()
-        elif venv == DEFAULT:
+        elif venv in [DEFAULT, 'python']:
             venv = get_current_environment()
 
         self.venv = venv

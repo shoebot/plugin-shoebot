@@ -128,7 +128,7 @@ class ShoebotPlugin(GObject.Object, Gedit.WindowActivatable, PeasGtk.Configurabl
             True)  # Switch to the tab
 
     def start_shoebot(self):
-        sbot_bin = preferences.shoebot_executable
+        sbot_bin = preferences.shoebot_binary
         if not sbot_bin:
             textbuffer = self.text.get_buffer()
             textbuffer.set_text('Cannot find sbot in path.')

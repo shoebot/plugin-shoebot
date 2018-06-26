@@ -2,6 +2,8 @@ import itertools
 import os
 
 from gi.repository import GLib, Gtk
+
+from plugin_shoebot.gui.gtk3.preferences import DEFAULT
 from plugin_shoebot.venv import virtualenvwrapper_envs, virtualenv_has_binary, is_virtualenv
 
 
@@ -27,7 +29,7 @@ class VirtualEnvChooser(Gtk.Box):
         virtualenv_store = Gtk.ListStore(str, str)
         virtualenv_combo = Gtk.ComboBox.new_with_model(virtualenv_store)
 
-        sys_envs = [['SYSTEM', 'System'], ['python', 'Default']]
+        sys_envs = [[SYSTEM, 'System'], [DEFAULT, 'Default']]
 
         all_envs = itertools.chain(
             sys_envs,
