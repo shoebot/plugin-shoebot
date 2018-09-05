@@ -1,11 +1,10 @@
 import os
 import sys
-from distutils.spawn import find_executable as which
 
 import gi
 
 from plugin_shoebot.venv import get_system_environment, get_current_environment, \
-    virtualenv_has_binary, virtualenv_interpreter
+    virtualenv_has_binary, virtualenv_interpreter, DEFAULT, SYSTEM
 
 gi.require_version('Gtk', '3.0')
 
@@ -14,9 +13,6 @@ from gi.repository import Gio, Gtk
 from plugin_shoebot import PLUGIN_DIRECTORY
 from plugin_shoebot.examples import find_example_dir
 from plugin_shoebot.venv_chooser import VirtualEnvChooser
-
-DEFAULT = 'default'
-SYSTEM = 'system'
 
 
 def load_gsettings():
@@ -73,7 +69,7 @@ class Preferences:
 
     def __repr__(self):
         return '<ShoebotPreferences venv={venv} python={python}>'.format(venv=self.venv,
-                                                                                       python=self.python)
+                                                                         python=self.python)
         # return '<ShoebotPreferences python={python} example_dir={example_dir}>'.format(python=self.python,
         #                                                                                example_dir=self.example_dir)
 

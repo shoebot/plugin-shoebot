@@ -1,7 +1,10 @@
 import os
 import sys
 
-from os.path import abspath, dirname, expanduser, expandvars, isfile, join, normpath, pathsep, relpath
+from os.path import abspath, dirname, expanduser, expandvars, isfile, join, pathsep
+
+DEFAULT = 'default'
+SYSTEM = 'system'
 
 PYTHON_BIN = os.path.basename(sys.executable)
 

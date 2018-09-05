@@ -3,8 +3,7 @@ import os
 
 from gi.repository import GLib, Gtk
 
-from plugin_shoebot.gui.gtk3.preferences import DEFAULT
-from plugin_shoebot.venv import virtualenvwrapper_envs, virtualenv_has_binary, is_virtualenv
+from plugin_shoebot.venv import virtualenvwrapper_envs, virtualenv_has_binary, is_virtualenv, DEFAULT, SYSTEM
 
 
 class VirtualEnvChooser(Gtk.Box):
@@ -33,7 +32,8 @@ class VirtualEnvChooser(Gtk.Box):
 
         all_envs = itertools.chain(
             sys_envs,
-            [[os.path.basename(venv), venv] for venv in virtualenvwrapper_envs(filter=lambda: virtualenv_has_binary(venv, 'sbot'))],
+            [[os.path.basename(venv), venv] for venv in
+             virtualenvwrapper_envs(filter=lambda: virtualenv_has_binary(venv, 'sbot'))],
             [[os.path.basename(venv), venv] for venv in self.user_envs]
         )
 
