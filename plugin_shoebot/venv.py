@@ -8,6 +8,14 @@ SYSTEM = 'system'
 
 PYTHON_BIN = os.path.basename(sys.executable)
 
+PYTHON2 = 'python2'
+PYTHON3 = 'python3'
+CURRENT_PYTHON = os.path.basename(sys.executable)
+ANY_PYTHON = [PYTHON2, PYTHON3]
+
+
+PYTHON_BINS = [PYTHON2, PYTHON3]
+
 
 def interpreter_environment(python):
     """
@@ -41,16 +49,26 @@ def get_current_environment():
     return interpreter_environment(sys.executable)
 
 
-def is_virtualenv(directory):
+def is_virtualenv(venv, interpreters=[CURRENT_PYTHON]):
     """
-    :param directory: base directory of python environment
+    :param venv: base directory of python environment
     """
-    path = os.path.join(directory, PYTHON_BIN)
-    return os.path.isfile(path)
+    for interpreter in interpreters:
+        if virtualenv_has_binary(venv, interpreter)[0]:
+            return True
+    return False
 
 
-def virtualenv_interpreter(venv):
-    return virtualenv_binary(venv, PYTHON_BIN)
+def is_interpreter(python_bin):
+    return python_bin == PYTHON_BIN
+
+
+def virtualenv_interpreter(venv, interpreters=ANY_PYTHON):#
+    for interpreter in interpreters:
+        has_interpreter, path = virtualenv_has_binary(venv, interpreter)
+        if has_interpreter:
+            return path
+    return None
 
 
 def virtualenv_binary(venv, binary):

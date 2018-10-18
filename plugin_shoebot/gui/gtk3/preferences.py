@@ -12,7 +12,7 @@ from gi.repository import Gio, Gtk
 
 from plugin_shoebot import PLUGIN_DIRECTORY
 from plugin_shoebot.examples import find_example_dir
-from plugin_shoebot.venv_chooser import VirtualEnvChooser
+from plugin_shoebot.venv_chooser import PythonEnvSelector
 
 
 def load_gsettings():
@@ -54,9 +54,9 @@ class Preferences:
         gsettings = load_gsettings()
         venv = gsettings.get_string('current-virtualenv')
 
-        if venv == SYSTEM:
+        if venv.lower() == SYSTEM:
             venv = get_system_environment()
-        elif venv in [DEFAULT, 'python']:
+        elif venv.lower() in [DEFAULT, 'python']:
             venv = get_current_environment()
 
         self.venv = venv
@@ -100,7 +100,7 @@ class ShoebotPreferences(Gtk.Box):
 
         gsettings = load_gsettings()
 
-        virtualenv_chooser = VirtualEnvChooser(gsettings=gsettings, on_virtualenv_chosen=virtualenv_changed)
+        virtualenv_chooser = PythonEnvSelector(gsettings=gsettings, on_virtualenv_chosen=virtualenv_changed)
         self.add(virtualenv_chooser)
 
 

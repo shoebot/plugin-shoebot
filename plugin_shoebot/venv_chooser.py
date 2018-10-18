@@ -3,12 +3,13 @@ import os
 
 from gi.repository import GLib, Gtk
 
-from plugin_shoebot.venv import virtualenvwrapper_envs, virtualenv_has_binary, is_virtualenv, DEFAULT, SYSTEM
+from plugin_shoebot.venv import virtualenvwrapper_envs, virtualenv_has_binary, is_virtualenv, DEFAULT, SYSTEM, \
+    ANY_PYTHON
 
 
-class VirtualEnvChooser(Gtk.Box):
+class PythonEnvSelector(Gtk.Box):
     """
-    Allow the user to choose a virtualenv.
+    Choose from a list of python environments.
 
     :param gsetting: save settings to this prefix
     """
@@ -33,7 +34,7 @@ class VirtualEnvChooser(Gtk.Box):
         all_envs = itertools.chain(
             sys_envs,
             [[os.path.basename(venv), venv] for venv in
-             virtualenvwrapper_envs(filter=lambda: virtualenv_has_binary(venv, 'sbot'))],
+             virtualenvwrapper_envs(filter=lambda venv: virtualenv_has_binary(venv, 'sbot'))],
             [[os.path.basename(venv), venv] for venv in self.user_envs]
         )
 
@@ -97,26 +98,37 @@ class VirtualEnvChooser(Gtk.Box):
             self.gsettings.set_value('virtualenvs', GLib.Variant('as', self.user_envs))
 
     def on_add_virtualenv(self, widget):
-        # TODO - complete this and remove print statements
-        dialog = Gtk.FileChooserDialog("Please choose a virtualenv", widget.get_toplevel(),
+        interpreters = ANY_PYTHON
+        chosen, venv = self._python_env_chooser(widget, interpreters)
+        if chosen:
+            self.add_virtualenv(venv)
+
+    def _python_env_chooser(self, parent, interpreters):
+        """
+        A Gtk File Dialogue to browse to python environments
+
+        :param parent: Gtk parent widget
+        :return: chosen, interpreter
+        """
+        dialog = Gtk.FileChooserDialog("Please choose a virtualenv", parent.get_toplevel(),
                                        Gtk.FileChooserAction.SELECT_FOLDER,
                                        (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                                         "Select", Gtk.ResponseType.OK))
         dialog.set_default_size(800, 400)
 
-        response = dialog.run()
-        if response == Gtk.ResponseType.OK:
-            print("Select clicked")
-            print("Folder selected: " + dialog.get_filename())
-            folder = dialog.get_filename()
-            if is_virtualenv(folder):
-                self.add_virtualenv(folder)
-                dialog.destroy()
+        while True:
+            response = dialog.run()
+            if response == Gtk.ResponseType.OK:
+                folder = os.path.expanduser(dialog.get_filename())
+                if is_virtualenv(folder, interpreters):
+                    self.add_virtualenv(folder)
+                    dialog.destroy()
+                    return True, folder
+                else:
+                    dialog.set_current_folder(folder)
             else:
-                print('Not a venv')
-        elif response == Gtk.ResponseType.CANCEL:
-            print("Cancel clicked")
-            dialog.destroy()
+                dialog.destroy()
+                return False, None
 
     def add_virtualenv(self, venv):
         self.virtualenv_store.append([os.path.basename(venv), venv])
