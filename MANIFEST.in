@@ -1,4 +1,4 @@
 include plugin_shoebot/install/plugin_data/apps.shoebot.gschema.xml
 include plugin_shoebot/install/plugin_data/shoebot.gedit-plugin
-include plugin_shoebot/install/plugin_data/shoebot.lang
-include plugin_shoebot/install/plugin_data/shoebot.plugin
+include plugin_shoebot/install/plugin_data/shoebot*.lang
+include plugin_shoebot/install/plugin_data/shoebot*.plugin
