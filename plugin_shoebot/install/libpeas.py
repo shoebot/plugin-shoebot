@@ -30,8 +30,8 @@ class PeasPlugin(PluginInstaller):
 
     copy = [
         ('{plugin_shoebot}', '{plugins_dir}/plugin_shoebot'),
-        ('{plugin_data}/shoebot.plugin', '{plugins_dir}'),
-        ('{plugin_data}/shoebot.lang', '{language_dir}'),
+        ('{plugin_data}/shoebot-{app_major_version}.plugin', '{plugins_dir}'),
+        ('{plugin_data}/shoebot-{app_major_version}.lang', '{language_dir}'),
     ]
 
     after_copy = [
@@ -47,5 +47,14 @@ class GioGeditPlugin(PeasPlugin):
     app_major_version = 'gedit-3'
 
 
+class GioXedPlugin(PeasPlugin):
+    """
+    gedit-3.12+ has GIO based menus
+    """
+    app = 'xed'
+    app_major_version = 'xed-1'
+
+
 def register_plugins():
     register_plugin('gedit', GioGeditPlugin)
+    register_plugin('xed', GioXedPlugin)
