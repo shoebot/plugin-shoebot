@@ -19,7 +19,7 @@ def example_menu_actions(text, root_dir=None, depth=0):
 
     :return: base_item, [rel_paths...]
     """
-    # 3.12+ menus
+    # GMenu (Gedit 3.12+ menus)
     examples_dir = preferences.example_dir
     if not examples_dir:
         return None, []

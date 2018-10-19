@@ -98,13 +98,16 @@ class CleanCommand(clean):
 
 
 setup(
+    include_package_data=True,
     name='plugin_shoebot',
-    version='0.1.7',
+    version='0.1.9',
     url='https://github.com/shoebot/plugin-shoebot.git',
     author='Stuart Axon',
     author_email='stu.axon@gmail.com',
     description=description,
+    install_requires=["functools32"],
     packages=find_packages(),
+    package_data={'': ['apps.shoebot.gschema.xml']},
     cmdclass={
         'clean': CleanCommand,
         'install': InstallCommand

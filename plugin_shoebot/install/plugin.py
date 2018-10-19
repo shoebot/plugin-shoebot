@@ -1,3 +1,4 @@
+# Install plugins to locations based on OS and if the user is admin or not
 import sys
 
 from os.path import abspath, dirname, expanduser, expandvars, isdir, join, normpath

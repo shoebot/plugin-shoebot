@@ -95,7 +95,7 @@ class ShoebotProcess(object):
 
         self.source = source.rstrip('\n')
 
-        # self.setup_io()
+        self.setup_io()
 
     def setup_io(self):
         # Turn off user prompts
