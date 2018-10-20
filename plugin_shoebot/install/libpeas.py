@@ -6,7 +6,7 @@ from plugin_shoebot.install.plugin import PluginInstaller
 
 class PeasPluginBase(PluginInstaller):
     vars = PluginInstaller.vars + [
-        'app', 'app_major_version', 'user_config_dir'
+        'app', 'app_major_version'
     ]
     target_dirs = PluginInstaller.target_dirs + [
         'plugins_dir', 'language_dir'
@@ -33,6 +33,9 @@ class PeasPluginBase(PluginInstaller):
 
 
 class Peas3PluginBase(PeasPluginBase):
+    vars = PeasPluginBase.vars + [
+        'user_config_dir'
+    ]
     user_config_dir = '~/.local/share'
 
     copy = [
@@ -43,6 +46,10 @@ class Peas3PluginBase(PeasPluginBase):
 
 
 class PlumaPlugin(PeasPluginBase):
+    vars = PeasPluginBase.vars + [
+        'user_config_dir'
+    ]
+
     user_config_dir = '~/.config'
     app = 'pluma'
     app_major_version = 'pluma-1'
@@ -52,6 +59,7 @@ class PlumaPlugin(PeasPluginBase):
         ('{plugin_data}/shoebot-{app_major_version}.pluma-plugin', '{plugins_dir}'),
         ('{plugin_data}/shoebot-{app_major_version}.lang', '{language_dir}'),
     ]
+
 
 class GioGeditPlugin(Peas3PluginBase):
     """
