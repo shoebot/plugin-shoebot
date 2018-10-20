@@ -50,7 +50,7 @@ class PlumaPlugin(PeasPluginBase):
 
     copy = [
         ('{plugin_shoebot}', '{plugins_dir}/plugin_shoebot'),
-        ('{plugin_data}/shoebot-{app_major_version}.plumba-plugin', '{plugins_dir}'),
+        ('{plugin_data}/shoebot-{app_major_version}.pluma-plugin', '{plugins_dir}'),
         ('{plugin_data}/shoebot-{app_major_version}.lang', '{language_dir}'),
     ]
 
