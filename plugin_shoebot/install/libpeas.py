@@ -12,10 +12,10 @@ class PeasPluginBase(PluginInstaller):
         'plugins_dir', 'language_dir'
     ]
 
-    darwin_install_dir = '~/.local/share'
+    darwin_install_dir = '{user_config_dir}'
 
     linux2_admin_install_dir = ['/usr/lib64', '/usr/lib']
-    linux2_user_install_dir = '~/.local/share'
+    linux2_user_install_dir = '{user_config_dir}'
 
     linux2_plugins_dir = "{install_dir}/{app}/plugins/"
 
@@ -24,7 +24,6 @@ class PeasPluginBase(PluginInstaller):
 
     nt_user_install_dir = "%UserProfile%\AppData\Roaming"
     nt_user_plugins_dir = "{install_dir}/{app}/plugins"
-
 
     language_dir = "{install_dir}/gtksourceview-3.0/language-specs"
 
