@@ -1,4 +1,4 @@
-[Gedit Plugin]
+[Plumba Plugin]
 Loader=python
 Module=shoebotit
 IAge=2
