@@ -58,10 +58,10 @@ class PluginInstaller(object):
             else:
                 return None
 
-        if value[0] == '~':
-            value = expanduser(value)
         value = expandvars(value)
         value = value.format(**fmt_vars)
+        if value[0] == '~':
+            value = expanduser(value)
         return value
 
     @classmethod
