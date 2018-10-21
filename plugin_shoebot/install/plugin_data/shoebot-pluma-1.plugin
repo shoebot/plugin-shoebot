@@ -1,0 +1,9 @@
+[Plumba Plugin]
+Loader=python
+Module=plugin_shoebot.plugins.peas3gtk
+IAge=3
+Name=Shoebot
+Description=Run scripts inside Shoebot
+Authors=Ricardo Lafuente <r@sollec.org>, Sebastian Oliva <tian2992@gmail.com>
+Copyright=Copyright © 2009, 2010 Ricardo Lafuente <r@sollec.org>
+Website=http://shoebot.net
