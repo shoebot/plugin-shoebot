@@ -32,6 +32,21 @@ WINDOW_ACCELS = [("run", "<Control>R")]
 EXAMPLES = []
 
 
+def _action_name(name, value):
+    if value in [True, False]:
+        return "toggle_{}".format(name)
+    else:
+        return "on_{}".format(name)
+
+
+def _action_data_name_text_value(name, text, value=None):
+    return name, text, value
+
+
+def _action_data_name_value(name, _text, value=None):
+    return name, value
+
+
 class GioActionHelperMixin:
     def create_actions(self, actions_data):
         """
@@ -41,9 +56,10 @@ class GioActionHelperMixin:
         See create_action
         """
         for action_data in actions_data:
-            self.create_action(*action_data)
+            name, value = _action_data_name_value(*action_data)
+            self.create_action(name, value)
 
-    def create_action(self, name, text, value=None):
+    def create_action(self, name, value=None):
         """
         Create standard or toggleable menu options and hook
         them up to actions on implementing class.
@@ -59,23 +75,25 @@ class GioActionHelperMixin:
         :return:
         """
         if value is None:
-            self.create_standard_action(name, text)
+            self.create_standard_action(name)
         elif value in [True, False]:
-            self.create_toggle_action(name, text, value)
+            self.create_toggle_action(name, value)
         else:
             raise ValueError('Unknown Action: {}'.format(str(action_data)))
 
-    def create_standard_action(self, name, text):
+    def create_standard_action(self, name):
         action_name = "on_%s" % name
         action = Gio.SimpleAction.new(name=action_name)
         action.connect("activate", getattr(self, action_name))
         self.window.add_action(action)
         return action
 
-    def create_toggle_action(self, name, text, value=False):
+    def create_toggle_action(self, name, value=False):
         """
         Create Gio Simple Action and hook it up to a function
         that toggles a boolean.
+
+        See create_toggle_handler for info on the handler.
 
         :param name: name, e.g. toggle_livecoding
         :param value:  initial value
@@ -91,16 +109,15 @@ class GioActionHelperMixin:
         self.window.add_action(action)
         return action
 
-    def create_toggle_handler(self, name, default=False):
+    def create_toggle_handler(self, name, value=False):
         """
         Create a handler that:
             toggles the GLib action
             sets a variable names like {name}_enabled
             calls a function named like on_toggle_{name}
 
-        :param name:
-        :param text:
-        :param default:
+        :param name: variable prefix, full name will be {name}_enabled
+        :param value: initial value
         """
         def call_toggle_func(action, user_data):
             enabled = not action.get_state().get_boolean()
@@ -111,7 +128,7 @@ class GioActionHelperMixin:
             if handler:
                 handler(action, user_data)
 
-        setattr(self, "{}_enabled".format(name), default)
+        setattr(self, "{}_enabled".format(name), value)
         call_toggle_func.__name__ = "call_toggle_{}".format(name)
         return call_toggle_func
 
@@ -356,14 +373,9 @@ class ShoebotPluginMenu(GObject.Object, Editor.AppActivatable):
             menu.append_item(examples_item)
 
         for action in MENU_ACTIONS:
-            if len(action) == 2:
-                name, text = action
-                action_name = "win.on_%s" % name
-                menu.append(menu_name, action_name)
-            else:
-                name, text, value = action
-                action_name = "win.toggle_%s" % name
-                menu.append(text, action_name)
+            name, text, value = _action_data_name_text_value(*action)
+            action_name = "win.{}".format(_action_name(name, value))
+            menu.append(text, action_name)
 
         return base
 
