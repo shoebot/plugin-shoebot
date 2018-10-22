@@ -1,5 +1,6 @@
 import sys
 
+
 def get_editor_class():
     """
     :return:editor class such as gi.repository.Gedit
