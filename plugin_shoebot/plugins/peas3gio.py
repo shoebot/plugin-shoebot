@@ -32,11 +32,11 @@ WINDOW_ACCELS = [("run", "<Control>R")]
 EXAMPLES = []
 
 
-def _action_name(name, value):
+def _action_prefix(value):
     if value in [True, False]:
-        return "toggle_{}".format(name)
+        return 'toggle'
     else:
-        return "on_{}".format(name)
+        return 'on'
 
 
 def _action_data_name_text_value(name, text, value=None):
@@ -119,7 +119,7 @@ class GioActionHelperMixin:
         :param name: variable prefix, full name will be {name}_enabled
         :param value: initial value
         """
-        def call_toggle_func(action, user_data):
+        def default_toggle_handler(action, user_data):
             enabled = not action.get_state().get_boolean()
             action.set_state(GLib.Variant.new_boolean(enabled))
             setattr(self, "{}_enabled".format(name), enabled)
@@ -129,8 +129,8 @@ class GioActionHelperMixin:
                 handler(action, user_data)
 
         setattr(self, "{}_enabled".format(name), value)
-        call_toggle_func.__name__ = "call_toggle_{}".format(name)
-        return call_toggle_func
+        default_toggle_handler.__name__ = "call_toggle_{}".format(name)
+        return default_toggle_handler
 
 
 class ShoebotPlugin(GObject.Object, Editor.WindowActivatable, PeasGtk.Configurable, GioActionHelperMixin):
@@ -374,7 +374,7 @@ class ShoebotPluginMenu(GObject.Object, Editor.AppActivatable):
 
         for action in MENU_ACTIONS:
             name, text, value = _action_data_name_text_value(*action)
-            action_name = "win.{}".format(_action_name(name, value))
+            action_name = "win.{}_{}".format(_action_prefix(value), name)
             menu.append(text, action_name)
 
         return base
