@@ -7,29 +7,12 @@ import errno
 import os
 import sys
 
+from peas_base import Editor
 from gi.repository import Gtk, GLib, Gio, GObject, Pango, PeasGtk
 
 from plugin_shoebot.gui.gtk3.menu_gio import encode_relpath, example_menu_actions
 from plugin_shoebot.gui.gtk3.preferences import ShoebotPreferences, preferences
 from plugin_shoebot.shoebot_wrapper import RESPONSE_CODE_OK, RESPONSE_REVERTED, CMD_LOAD_BASE64, ShoebotProcess
-
-
-def get_editor_class():
-    """
-    :return:editor class such as gi.repository.Gedit
-    """
-    for editor in ['Gedit', 'Xed']:
-        try:
-            Editor = __import__('gi.repository.{}'.format(editor), fromlist=editor)
-            from gi.repository import Gedit
-            return Editor
-        except ImportError:
-            pass
-    else:
-        sys.stderr.write('Unknown editor')
-
-
-Editor = get_editor_class()
 
 WINDOW_ACTIONS = [
     (_("Run in Shoebot"), "run")

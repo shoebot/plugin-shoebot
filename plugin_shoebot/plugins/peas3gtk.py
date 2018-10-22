@@ -1,5 +1,6 @@
 from distutils.spawn import find_executable as which
-from gi.repository import Gtk, Gio, GObject, Gedit, Pango, PeasGtk
+from .peas_base import Editor
+from gi.repository import Gtk, Gio, GObject, Pango, PeasGtk
 from gettext import gettext as _
 from shoebotit import ide_utils, gtk3_utils
 
@@ -252,8 +253,8 @@ class ShoebotWindowHelper(object):
         pass
 
 
-class ShoebotPlugin(GObject.Object, Gedit.WindowActivatable, PeasGtk.Configurable):
-    window = GObject.property(type=Gedit.Window)
+class ShoebotPlugin(GObject.Object, Editor.WindowActivatable, PeasGtk.Configurable):
+    window = GObject.property(type=Editor.Window)
 
     def __init__(self):
         GObject.Object.__init__(self)
