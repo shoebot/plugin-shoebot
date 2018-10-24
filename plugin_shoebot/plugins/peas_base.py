@@ -16,3 +16,5 @@ def get_editor_class():
 
 
 Editor = get_editor_class()
+
+EDITOR_NAME = Editor.__name__

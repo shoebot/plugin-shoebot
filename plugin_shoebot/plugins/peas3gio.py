@@ -1,5 +1,5 @@
 """
-Plugin Gedit 3.12+ using gio based menus.
+Plugin for Gedit, Xed editors with Gio based menus..
 """
 
 import errno
@@ -82,8 +82,8 @@ class ShoebotPlugin(GObject.Object, Editor.WindowActivatable, PeasGtk.Configurab
         self.live_container, self.live_text = self.create_scrollable_textview("shoebot-live")
         self.panel = self.window.get_bottom_panel()
 
-        self.panel.add_titled(self.output_container, 'Shoebot', 'Shoebot')
-        self.panel.add_titled(self.live_container, 'Shoebot Live', 'Shoebot Live')
+        self.panel.add_titled(self.output_container, _('Shoebot'), _('Shoebot'))
+        self.panel.add_titled(self.live_container, _('Shoebot Live'), _('Shoebot Live'))
 
     def create_example_actions(self, examples):
         for rel_path in examples:
@@ -125,7 +125,7 @@ class ShoebotPlugin(GObject.Object, Editor.WindowActivatable, PeasGtk.Configurab
                 Gtk.main_iteration()
             return False
 
-        if self.bot and self.bot.process.poll() == None:
+        if self.bot and self.bot.process.poll() is not None:
             self.bot.send_command("quit")
 
         # get the text buffer
@@ -133,7 +133,7 @@ class ShoebotPlugin(GObject.Object, Editor.WindowActivatable, PeasGtk.Configurab
         if not doc:
             return
 
-        title = '%s - Shoebot on gedit' % doc.get_short_name_for_display()
+        title = '%s - Shoebot on %s' % (doc.get_short_name_for_display(), EDITOR_NAME)
         cwd = os.path.dirname(doc.get_uri_for_display()) or None
 
         start, end = doc.get_bounds()
