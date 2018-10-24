@@ -13,7 +13,7 @@ from gettext import gettext as _
 from gi.repository import Gtk, Gio, GObject, Pango, PeasGtk
 
 from .peas_base import Editor
-from plugin_shoebot.gui.gtk3.actions_gio import _action_prefix, _action_data_name_text_value, GioActionHelperMixin
+from plugin_shoebot.gui.gtk3.actions_gio import action_prefix, action_data_name_text_value, GioActionHelperMixin
 from plugin_shoebot.gui.gtk3.menu_gio import encode_relpath, example_menu_actions
 from plugin_shoebot.gui.gtk3.preferences import ShoebotPreferences, preferences
 from plugin_shoebot.shoebot_wrapper import RESPONSE_CODE_OK, RESPONSE_REVERTED, CMD_LOAD_BASE64, ShoebotProcess
@@ -30,6 +30,10 @@ MENU_ACTIONS = [
 WINDOW_ACCELS = [("run", "<Control>R")]
 
 EXAMPLES = []
+
+
+class ConsoleWindow:
+    pass
 
 
 class ShoebotPlugin(GObject.Object, Editor.WindowActivatable, PeasGtk.Configurable, GioActionHelperMixin):
@@ -257,12 +261,10 @@ class ShoebotPluginMenu(GObject.Object, Editor.AppActivatable):
 
     def __init__(self):
         GObject.Object.__init__(self)
-        self.shoebot_menu = None
         self.tools_menu_ext = None
 
-    def build_menu(self, menu_name=_("Shoebot")):
+    def build_menu(self):
         menu = Gio.Menu.new()
-        base = Gio.MenuItem.new_submenu(menu_name, menu)
 
         examples_item, examples = example_menu_actions(_("E_xamples"))
 
@@ -272,23 +274,24 @@ class ShoebotPluginMenu(GObject.Object, Editor.AppActivatable):
             menu.append_item(examples_item)
 
         for action in MENU_ACTIONS:
-            name, text, value = _action_data_name_text_value(*action)
-            action_name = "win.{}_{}".format(_action_prefix(value), name)
+            name, text, value = action_data_name_text_value(*action)
+            action_name = "win.{}_{}".format(action_prefix(value), name)
             menu.append(text, action_name)
 
-        return base
+        return menu
 
     def do_activate(self):
         for name, accel in WINDOW_ACCELS:
             self.app.set_accels_for_action("win.on_%s" % name, (accel, None))
 
-        shoebot_menu = self.build_menu()
-        self.shoebot_menu = shoebot_menu
+        menu = self.build_menu()
+
+        base = Gio.MenuItem.new_submenu(_("Shoebot"), menu)
         self.tools_menu_ext = self.extend_menu("tools-section")
-        self.tools_menu_ext.append_menu_item(shoebot_menu)
+        self.tools_menu_ext.append_menu_item(base)
 
     def do_deactivate(self):
         for name, accel in WINDOW_ACCELS:
             self.app.set_accels_for_action("win.on_%s" % name, ())
+        self.tools_menu_ext.remove_items()
         self.tools_menu_ext = None
-        self.shoebot_menu = None

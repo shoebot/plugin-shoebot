@@ -1,18 +1,18 @@
 from gi.repository import Gio, GLib
 
 
-def _action_prefix(value):
+def action_prefix(value):
     if value in [True, False]:
         return 'toggle'
     else:
         return 'on'
 
 
-def _action_data_name_text_value(name, text, value=None):
+def action_data_name_text_value(name, text, value=None):
     return name, text, value
 
 
-def _action_data_name_value(name, _text, value=None):
+def action_data_name_value(name, _text, value=None):
     return name, value
 
 
@@ -25,7 +25,7 @@ class GioActionHelperMixin:
         See create_action
         """
         for action_data in actions_data:
-            name, value = _action_data_name_value(*action_data)
+            name, value = action_data_name_value(*action_data)
             self.create_action(name, value)
 
     def create_action(self, name, value=None):
