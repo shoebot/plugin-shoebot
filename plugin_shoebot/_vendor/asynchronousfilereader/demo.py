@@ -3,7 +3,7 @@ import subprocess
 import random
 import time
 
-from ..asynchronousfilereader import AsynchronousFileReader
+from ....asynchronousfilereader import AsynchronousFileReader
 
 
 def consume(command):

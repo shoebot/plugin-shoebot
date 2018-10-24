@@ -6,7 +6,7 @@ import textwrap
 try:
     from functools import lru_cache
 except ImportError:
-    from functools32 import lru_cache
+    from plugin_shoebot._vendor.functools32 import lru_cache
 
 
 @lru_cache(maxsize=1)
