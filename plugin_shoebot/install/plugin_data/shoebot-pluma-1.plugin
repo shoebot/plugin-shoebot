@@ -1,4 +1,4 @@
-[Plumba Plugin]
+[Pluma Plugin]
 Loader=python
 Module=plugin_shoebot.plugins.peas3gtk
 IAge=3
