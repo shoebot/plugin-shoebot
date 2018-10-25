@@ -2,7 +2,7 @@ from plugin_shoebot.gui.gtk3.utils import get_child_by_name
 from .peas_base import Editor, EDITOR_NAME
 from plugin_shoebot.gui.gtk3.menu_gaction import example_menu_xml
 from plugin_shoebot.gui.gtk3.preferences import ShoebotPreferences, preferences
-from gi.repository import Gtk, Gio, GObject, Pango, PeasGtk
+from gi.repository import Gtk, Gio, GObject, Pango, Peas, PeasGtk
 from gettext import gettext as _
 
 import os
@@ -277,10 +277,12 @@ class ShoebotWindowHelper(object):
         pass
 
 
-class ShoebotPlugin(GObject.Object, Editor.WindowActivatable, PeasGtk.Configurable):
-    window = GObject.property(type=Editor.Window)
+class ShoebotPlugin(GObject.Object, Peas.Activatable, PeasGtk.Configurable):
+    __gtype_name__ = "ShoebotPlugin"
+    object = GObject.property(type=GObject.Object)
 
     def __init__(self):
+    	print("ShoebotPlugin __init__")
         GObject.Object.__init__(self)
         self.instances = {}
 
@@ -310,22 +312,30 @@ class ShoebotPlugin(GObject.Object, Editor.WindowActivatable, PeasGtk.Configurab
         return container, text_view
 
     def add_output_widgets(self):
+        window = self.object
         self.output_container, self.text = self.create_scrollable_textview("shoebot-output")
         self.live_container, self.live_text = self.create_scrollable_textview("shoebot-live")
-        self.panel = self.window.get_bottom_panel()
+        self.panel = window.get_bottom_panel()
 
-        self.panel.add_titled(self.output_container, _('Shoebot'), _('Shoebot'))
-        self.panel.add_titled(self.live_container, _('Shoebot Live'), _('Shoebot Live'))
+    	self.panel.add(self.output_container)
+    	self.panel.add(self.live_container)
+        #self.panel.add_titled(self.output_container, _('Shoebot'), _('Shoebot'))
+        #self.panel.add_titled(self.live_container, _('Shoebot Live'), _('Shoebot Live'))
+
+    def add_window_actions(self):
+		pass
 
     def do_deactivate(self):
+        window = self.object
         self.panel.remove_item(self.text)
-        self.instances[self.window].deactivate()
-        del self.instances[self.window]
+        ##self.instances[window].deactivate()
+        ##del self.instances[window]
 
         self.panel.remove_item(self.text)
 
     def do_update_state(self):
-        self.instances[self.window].update_ui()
+        window = self.object
+        ##self.instances[window].update_ui()
 
     def do_create_configure_widget(self):
         widget = ShoebotPreferences()
