@@ -1,8 +1,11 @@
+from gi.repository import Gtk, Gio, GObject, Pango, Peas, PeasGtk
+
 from plugin_shoebot.gui.gtk3.utils import get_child_by_name
 from .peas_base import Editor, EDITOR_NAME
 from plugin_shoebot.gui.gtk3.menu_gaction import example_menu_xml
 from plugin_shoebot.gui.gtk3.preferences import ShoebotPreferences, preferences
-from gi.repository import Gtk, Gio, GObject, Pango, Peas, PeasGtk
+from plugin_shoebot.shoebot_wrapper import RESPONSE_CODE_OK, RESPONSE_REVERTED, CMD_LOAD_BASE64, ShoebotProcess
+
 from gettext import gettext as _
 
 import os
@@ -39,11 +42,8 @@ class ShoebotWindowHelper(object):
         self.idle_handler_id = None
 
         panel = window.get_bottom_panel()
-        self.text = get_child_by_name(panel, 'shoebot-output')
-        self.live_text = get_child_by_name(panel, 'shoebot-live')
 
         self.plugin = plugin
-        self.insert_menu()
         self.id_name = 'ShoebotPluginID'
 
         self.use_socketserver = False
@@ -54,10 +54,21 @@ class ShoebotWindowHelper(object):
 
         self.started = False
 
-        for view in self.window.get_views():
-            self.connect_view(view)
+        ##for view in self.window.get_views():
+        ##    self.connect_view(view)
 
         self.bot = None
+
+    @property
+    def text(self):
+        return self.plugin.text
+
+    @property
+    def live_text(self):
+        return self.plugin.live_text
+
+    def activate(self):
+        self.insert_menu()
 
     def deactivate(self):
         self.remove_menu()
@@ -100,16 +111,24 @@ class ShoebotWindowHelper(object):
 
         drive, directory = os.path.splitdrive(os.path.abspath(os.path.normpath(filename)))
         uri = "file:///%s%s" % (drive, directory)
-        gio_file = Gio.file_new_for_uri(uri)
-        self.window.create_tab_from_location(
-            gio_file,
-            None,  # encoding
-            0,
-            0,     # column
-            False, # Do not create an empty file
-            True)  # Switch to the tab
+        if hasattr(self.window, 'create_tab_from_uri'):
+            self.window.create_tab_from_uri(uri,
+                    Editor.encoding_get_current(),
+                    0,
+                    False,  # Do not create a new file
+                    True)   # Switch to tab
+        else:
+            gio_file = Gio.file_new_for_uri(uri)
+            self.window.create_tab_from_location(
+                gio_file,
+                None,  # encoding
+                0,
+                0,     # column
+                False, # Do not create an empty file
+                True)  # Switch to the tab
 
     def remove_menu(self):
+        print(self, "remove_menu")
         manager = self.window.get_ui_manager()
         manager.remove_action_group(self.action_group)
         for bot, ui_id in self.example_bots.items():
@@ -165,7 +184,7 @@ class ShoebotWindowHelper(object):
         self.disconnect_change_handler(doc)
         self.changed_handler_id = doc.connect("changed", self.doc_changed)
 
-        self.bot = ide_utils.ShoebotProcess(source, self.use_socketserver, self.show_varwindow, self.use_fullscreen, self.verbose_output, title, cwd=cwd, sbot=sbot_bin)
+        self.bot = ShoebotProcess(source, self.use_socketserver, self.show_varwindow, self.use_fullscreen, self.verbose_output, title, cwd=cwd, sbot=sbot_bin)
         self.idle_handler_id = GObject.idle_add(self.update_shoebot)
 
     def disconnect_change_handler(self, doc):
@@ -228,11 +247,11 @@ class ShoebotWindowHelper(object):
                     textbuffer.delete(textbuffer.get_start_iter(), textbuffer.get_end_iter())
                 else:
                     cmd, status, info = response.cmd, response.status, response.info
-                    if cmd == ide_utils.CMD_LOAD_BASE64:
-                        if status == ide_utils.RESPONSE_CODE_OK:
+                    if cmd == CMD_LOAD_BASE64:
+                        if status == RESPONSE_CODE_OK:
                             textbuffer.delete(textbuffer.get_start_iter(), textbuffer.get_end_iter())
                             # TODO switch panels to 'Shoebot' if on 'Shoebot Live'
-                        elif status == ide_utils.RESPONSE_REVERTED:
+                        elif status == RESPONSE_REVERTED:
                             textbuffer.insert(textbuffer.get_end_iter(), '\n'.join(info).replace('\\n', '\n'))
 
             while Gtk.events_pending():
@@ -267,28 +286,29 @@ class ShoebotWindowHelper(object):
 
 
 
-    # Right-click menu items (for quicktorials)
-
-    def connect_view(self, view):
-        # taken from gedit-plugins-python-openuricontextmenu
-        #handler_id = view.connect('populate-popup', self.on_view_populate_popup)
-        #view.set_data(self.id_name, [handler_id])
-
-        pass
-
-
 class ShoebotPlugin(GObject.Object, Peas.Activatable, PeasGtk.Configurable):
     __gtype_name__ = "ShoebotPlugin"
     object = GObject.property(type=GObject.Object)
 
     def __init__(self):
-    	print("ShoebotPlugin __init__")
         GObject.Object.__init__(self)
-        self.instances = {}
+        window = self.object
 
     def do_activate(self):
+        window = self.object
+        self.menu = ShoebotWindowHelper(self, window)
+        self.menu.activate()
+
         self.add_output_widgets()
         self.add_window_actions()
+        self.menu.insert_menu()
+
+    def do_deactivate(self):
+        window = self.object
+        self.menu.remove_menu()
+        self.menu.deactivate()
+        self.panel.remove_item(self.text)
+        self.panel.remove_item(self.live_text)
 
     def create_scrollable_textview(self, name):
         """
@@ -316,26 +336,15 @@ class ShoebotPlugin(GObject.Object, Peas.Activatable, PeasGtk.Configurable):
         self.output_container, self.text = self.create_scrollable_textview("shoebot-output")
         self.live_container, self.live_text = self.create_scrollable_textview("shoebot-live")
         self.panel = window.get_bottom_panel()
-
-    	self.panel.add(self.output_container)
-    	self.panel.add(self.live_container)
-        #self.panel.add_titled(self.output_container, _('Shoebot'), _('Shoebot'))
-        #self.panel.add_titled(self.live_container, _('Shoebot Live'), _('Shoebot Live'))
+        self.panel.add_item_with_stock_icon(self.output_container, "Outut", Gtk.STOCK_EXECUTE)
+        self.panel.add_item_with_stock_icon(self.live_container, "Live", Gtk.STOCK_EXECUTE)
 
     def add_window_actions(self):
-		pass
-
-    def do_deactivate(self):
-        window = self.object
-        self.panel.remove_item(self.text)
-        ##self.instances[window].deactivate()
-        ##del self.instances[window]
-
-        self.panel.remove_item(self.text)
+        pass
 
     def do_update_state(self):
         window = self.object
-        ##self.instances[window].update_ui()
+        window.get_ui_manager().ensure_update()
 
     def do_create_configure_widget(self):
         widget = ShoebotPreferences()
