@@ -12,7 +12,7 @@ gi.require_version('Gtk', '3.0')
 from gettext import gettext as _
 from gi.repository import Gtk, Gio, GObject, Pango, PeasGtk
 
-from .peas_base import Editor
+from .peas_base import Editor, EDITOR_NAME
 from plugin_shoebot.gui.gtk3.actions_gio import action_prefix, action_data_name_text_value, GioActionHelperMixin
 from plugin_shoebot.gui.gtk3.menu_gio import encode_relpath, example_menu_actions
 from plugin_shoebot.gui.gtk3.preferences import ShoebotPreferences, preferences
