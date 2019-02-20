@@ -280,23 +280,21 @@ class ShoebotWindowHelper(object):
             self.bot.live_source_load(source)
 
             icon = Gtk.Image()
-            panel.add_item(self.live_text, 'Shoebot Live', 'Shoebot Live', icon)
+            panel.add_item(self.live_text, 'Shoebot Live', icon)
         else:
             panel.remove_item(self.live_text)
 
 
 
-class ShoebotPlugin(GObject.Object, Peas.Activatable, PeasGtk.Configurable):
+class ShoebotPlugin(GObject.Object, Editor.WindowActivatable, PeasGtk.Configurable):
     __gtype_name__ = "ShoebotPlugin"
-    object = GObject.property(type=GObject.Object)
+    window = GObject.property(type=Editor.Window)
 
     def __init__(self):
         GObject.Object.__init__(self)
-        window = self.object
 
     def do_activate(self):
-        window = self.object
-        self.menu = ShoebotWindowHelper(self, window)
+        self.menu = ShoebotWindowHelper(self, self.window)
         self.menu.activate()
 
         self.add_output_widgets()
@@ -304,7 +302,6 @@ class ShoebotPlugin(GObject.Object, Peas.Activatable, PeasGtk.Configurable):
         self.menu.insert_menu()
 
     def do_deactivate(self):
-        window = self.object
         self.menu.remove_menu()
         self.menu.deactivate()
         self.panel.remove_item(self.text)
@@ -332,19 +329,17 @@ class ShoebotPlugin(GObject.Object, Peas.Activatable, PeasGtk.Configurable):
         return container, text_view
 
     def add_output_widgets(self):
-        window = self.object
         self.output_container, self.text = self.create_scrollable_textview("shoebot-output")
         self.live_container, self.live_text = self.create_scrollable_textview("shoebot-live")
-        self.panel = window.get_bottom_panel()
-        self.panel.add_item_with_stock_icon(self.output_container, "Outut", Gtk.STOCK_EXECUTE)
-        self.panel.add_item_with_stock_icon(self.live_container, "Live", Gtk.STOCK_EXECUTE)
+        self.panel = self.window.get_bottom_panel()
+        self.panel.add_item(self.output_container, "Output", Gtk.STOCK_EXECUTE)
+        self.panel.add_item(self.live_container, "Live", Gtk.STOCK_EXECUTE)
 
     def add_window_actions(self):
         pass
 
     def do_update_state(self):
-        window = self.object
-        window.get_ui_manager().ensure_update()
+        self.window.get_ui_manager().ensure_update()
 
     def do_create_configure_widget(self):
         widget = ShoebotPreferences()
