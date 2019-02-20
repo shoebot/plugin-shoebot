@@ -1,6 +1,6 @@
 [Plugin]
 Loader=python3
-Module=plugin_shoebot.plugins.peas3gio
+Module=plugin_shoebot.plugins.peas3gtk
 IAge=3
 Name=Shoebot
 Description=Run scripts inside Shoebot
