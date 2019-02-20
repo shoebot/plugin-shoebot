@@ -6,7 +6,7 @@ import shutil
 import sys
 
 from setuptools.command.easy_install import easy_install
-from plugin_shoebot.install import get_plugin_outputs, install_plugins, parse_plugin_names
+from plugin_shoebot.install import get_plugin_outputs, install_plugins, parse_plugin_names, get_plugin_names
 
 description = 'Integrate and control shoebot from editors or anything else',
 here = os.path.dirname(os.path.abspath(__file__))
@@ -28,7 +28,7 @@ class EasyInstallWithPTH(easy_install):
     """ Installs shoebot plugins."""
     description = "Installs plugin-shoebot"
     user_options = install.user_options + [
-        ('plugins=', None, 'Install gedit plugin.'),
+        ('plugins=', None, 'Specify plugins [{}].'.format('')),
     ]
 
     def initialize_options(self):
@@ -51,7 +51,7 @@ class InstallCommand(install):
     """ Installs shoebot plugins."""
     description = "Installs plugin-shoebot"
     user_options = install.user_options + [
-        ('plugins=', None, 'Install gedit plugin.'),
+        ('plugins=', None, ' '.join(sorted(get_plugin_names()))),
     ]
 
     def initialize_options(self):
@@ -100,7 +100,7 @@ class CleanCommand(clean):
 setup(
     include_package_data=True,
     name='plugin_shoebot',
-    version='0.1.9',
+    version='0.2.0',
     url='https://github.com/shoebot/plugin-shoebot.git',
     author='Stuart Axon',
     author_email='stu.axon@gmail.com',

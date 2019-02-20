@@ -4,7 +4,7 @@ from plugin_shoebot.install import register_plugin
 from plugin_shoebot.install.plugin import PluginInstaller
 
 
-class PeasPlugin(PluginInstaller):
+class PeasPluginBase(PluginInstaller):
     vars = PluginInstaller.vars + [
         'app', 'app_major_version'
     ]
@@ -12,10 +12,10 @@ class PeasPlugin(PluginInstaller):
         'plugins_dir', 'language_dir'
     ]
 
-    darwin_install_dir = '~/.local/share'
+    darwin_install_dir = '{user_config_dir}'
 
     linux2_admin_install_dir = ['/usr/lib64', '/usr/lib']
-    linux2_user_install_dir = '~/.local/share'
+    linux2_user_install_dir = '{user_config_dir}'
 
     linux2_plugins_dir = "{install_dir}/{app}/plugins/"
 
@@ -25,8 +25,18 @@ class PeasPlugin(PluginInstaller):
     nt_user_install_dir = "%UserProfile%\AppData\Roaming"
     nt_user_plugins_dir = "{install_dir}/{app}/plugins"
 
-
     language_dir = "{install_dir}/gtksourceview-3.0/language-specs"
+
+    after_copy = [
+        lambda self, directories: os.system("glib-compile-schemas {plugins_dir}plugin_shoebot/install/plugin_data\n".format(**directories))
+    ]
+
+
+class Peas3PluginBase(PeasPluginBase):
+    vars = PeasPluginBase.vars + [
+        'user_config_dir'
+    ]
+    user_config_dir = '~/.local/share'
 
     copy = [
         ('{plugin_shoebot}', '{plugins_dir}/plugin_shoebot'),
@@ -34,12 +44,24 @@ class PeasPlugin(PluginInstaller):
         ('{plugin_data}/shoebot-{app_major_version}.lang', '{language_dir}'),
     ]
 
-    after_copy = [
-        lambda self, directories: os.system("glib-compile-schemas {plugins_dir}plugin_shoebot/install/plugin_data\n".format(**directories))
+
+class PlumaPlugin(PeasPluginBase):
+    vars = PeasPluginBase.vars + [
+        'user_config_dir'
+    ]
+
+    user_config_dir = '~/.config'
+    app = 'pluma'
+    app_major_version = 'pluma-1'
+
+    copy = [
+        ('{plugin_shoebot}', '{plugins_dir}/plugin_shoebot'),
+        ('{plugin_data}/shoebot-{app_major_version}.pluma-plugin', '{plugins_dir}'),
+        ('{plugin_data}/shoebot-{app_major_version}.lang', '{language_dir}'),
     ]
 
 
-class GioGeditPlugin(PeasPlugin):
+class GioGeditPlugin(Peas3PluginBase):
     """
     gedit-3.12+ has GIO based menus
     """
@@ -47,7 +69,7 @@ class GioGeditPlugin(PeasPlugin):
     app_major_version = 'gedit-3'
 
 
-class GioXedPlugin(PeasPlugin):
+class GioXedPlugin(Peas3PluginBase):
     """
     gedit-3.12+ has GIO based menus
     """
@@ -58,3 +80,4 @@ class GioXedPlugin(PeasPlugin):
 def register_plugins():
     register_plugin('gedit', GioGeditPlugin)
     register_plugin('xed', GioXedPlugin)
+    register_plugin('pluma', PlumaPlugin)

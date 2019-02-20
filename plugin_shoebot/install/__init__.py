@@ -38,6 +38,10 @@ def install_plugins(plugin_names=None):
             plugin.copy_files()
 
 
+def get_plugin_names():
+    return plugins.keys()
+
+
 def get_plugin_outputs():
     outputs = []
     for name, plugin_klass in plugins.items():

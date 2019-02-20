@@ -70,8 +70,6 @@ class Preferences:
     def __repr__(self):
         return '<ShoebotPreferences venv={venv} python={python}>'.format(venv=self.venv,
                                                                          python=self.python)
-        # return '<ShoebotPreferences python={python} example_dir={example_dir}>'.format(python=self.python,
-        #                                                                                example_dir=self.example_dir)
 
 
 preferences = Preferences()
