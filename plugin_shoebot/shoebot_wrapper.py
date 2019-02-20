@@ -148,8 +148,12 @@ class ShoebotProcess(object):
         else:
             data = bytearray(cmd, "ascii") + b'\n'
 
-        self.process.stdin.write(data)
-        self.process.stdin.flush()
+        try:
+            self.process.stdin.write(data)
+            self.process.stdin.flush()
+        except BrokenPipeError as e:
+            print("Disconnected")
+            self.close()
 
     def close(self):
         """

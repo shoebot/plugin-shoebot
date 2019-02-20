@@ -111,21 +111,33 @@ class ShoebotWindowHelper(object):
 
         drive, directory = os.path.splitdrive(os.path.abspath(os.path.normpath(filename)))
         uri = "file:///%s%s" % (drive, directory)
+        # Shim
         if hasattr(self.window, 'create_tab_from_uri'):
             self.window.create_tab_from_uri(uri,
                     Editor.encoding_get_current(),
                     0,
                     False,  # Do not create a new file
                     True)   # Switch to tab
-        else:
+        elif hasattr(self.window, 'create_tab_from_location'):
+            # (gi.ArgInfo(location), gi.ArgInfo(encoding), gi.ArgInfo(line_pos), gi.ArgInfo(create), gi.ArgInfo(jump_to))
             gio_file = Gio.file_new_for_uri(uri)
-            self.window.create_tab_from_location(
-                gio_file,
-                None,  # encoding
-                0,
-                0,     # column
-                False, # Do not create an empty file
-                True)  # Switch to the tab
+
+            if len(self.window.create_tab_from_location.get_arguments()) == 5:
+                 # Xed uses creare_tab_from_location with different args
+                 self.window.create_tab_from_location(gio_file,
+                    None,   # encoding
+                    0,
+                    False,  # Do not create a new file
+                    True)   # Switch to tab
+            else:
+                 # older style gedit - (Pluma ?)
+                 self.window.create_tab_from_location(
+                     gio_file,
+                     None,  # encoding
+                     0,
+                     0,     # column
+                     False, # Do not create an empty file
+                     True)  # Switch to the tab
 
     def remove_menu(self):
         print(self, "remove_menu")

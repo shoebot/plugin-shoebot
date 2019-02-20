@@ -14,6 +14,11 @@ from plugin_shoebot import PLUGIN_DIRECTORY
 from plugin_shoebot.examples import find_example_dir
 from plugin_shoebot.venv_chooser import PythonEnvSelector
 
+try:
+    from shutil import which
+except:
+    from distutils.spawn import find_executable as which
+
 
 def load_gsettings():
     schema_id = "apps.shoebot"
@@ -52,15 +57,18 @@ def find_shoebot_binary(venv):
 class Preferences:
     def __init__(self):
         gsettings = load_gsettings()
-        venv = gsettings.get_string('current-virtualenv')
+        venv_setting = gsettings.get_string('current-virtualenv')
 
-        if venv.lower() == SYSTEM:
+        if venv_setting.lower() == SYSTEM:
             venv = get_system_environment()
-        elif venv.lower() in [DEFAULT, 'python']:
-            venv = get_current_environment()
+        elif venv_setting.lower() in [DEFAULT, 'python']:
+            venv = interpreter_environment(which("sbot"))
+        else:
+            venv = venv_setting
 
         self.venv = venv
         self.shoebot_binary = find_shoebot_binary(self.venv)
+
 
     @property
     def example_dir(self):
