@@ -148,8 +148,13 @@ class ShoebotProcess(object):
         else:
             data = bytearray(cmd, "ascii") + b'\n'
 
-        self.process.stdin.write(data)
-        self.process.stdin.flush()
+        try:
+            self.process.stdin.write(data)
+            self.process.stdin.flush()
+        except IOError:
+            if cmd != "quit":
+                # TODO, this is a bit hacky
+                raise
 
     def close(self):
         """
