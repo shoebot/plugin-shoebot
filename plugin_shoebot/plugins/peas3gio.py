@@ -9,10 +9,10 @@ import sys
 
 gi.require_version('Gtk', '3.0')
 
+from ..gui.gtk3.actions_gio import GioActionHelperMixin
 from gettext import gettext as _
 from gi.repository import Gtk, Gio, GObject, Pango, PeasGtk
 
-from .peas_base import Editor, EDITOR_NAME
 from plugin_shoebot.gui.gtk3.actions_gio import action_prefix, action_data_name_text_value, GioActionHelperMixin
 from plugin_shoebot.gui.gtk3.menu_gio import encode_relpath, example_menu_actions
 from plugin_shoebot.gui.gtk3.preferences import ShoebotPreferences, preferences
@@ -32,16 +32,11 @@ WINDOW_ACCELS = [("run", "<Control>R")]
 EXAMPLES = []
 
 
-class ConsoleWindow:
-    pass
+class ShoebotWindowHelperGio(GioActionHelperMixin):
 
-
-class ShoebotPlugin(GObject.Object, Editor.WindowActivatable, PeasGtk.Configurable, GioActionHelperMixin):
-    __gtype_name__ = "ShoebotPlugin"
-    window = GObject.property(type=Editor.Window)
-
-    def __init__(self):
-        GObject.Object.__init__(self)
+    def __init__(self, window, editor_name):
+        self.window = window
+        self.editor_name = editor_name
 
         self.changed_handler_id = None
         self.idle_handler_id = None
@@ -116,6 +111,28 @@ class ShoebotPlugin(GObject.Object, Editor.WindowActivatable, PeasGtk.Configurab
             False,  # Do not create an empty file
             True)  # Switch to the tab
 
+    def toggle_socket_server(self, action):
+        self.use_socketserver = action.get_active()
+
+    def toggle_var_window(self, action):
+        self.show_varwindow = action.get_active()
+
+    def toggle_fullscreen(self, action):
+        self.use_fullscreen = action.get_active()
+
+    def toggle_livecoding(self, action):
+        self.livecoding = action.get_active()
+        panel = self.window.get_bottom_panel()
+        if self.livecoding and self.bot:
+            doc = self.window.get_active_document()
+            source = self.get_source(doc)
+            self.bot.live_source_load(source)
+
+            icon = Gtk.Image()
+            panel.add_item(self.live_text, 'Shoebot Live', 'Shoebot Live', icon)
+        else:
+            panel.remove_item(self.live_text)
+
     def start_shoebot(self):
         sbot_bin = preferences.shoebot_binary
         if not sbot_bin:
@@ -133,7 +150,7 @@ class ShoebotPlugin(GObject.Object, Editor.WindowActivatable, PeasGtk.Configurab
         if not doc:
             return
 
-        title = '%s - Shoebot on %s' % (doc.get_short_name_for_display(), EDITOR_NAME)
+        title = '%s - Shoebot on %s' % (doc.get_short_name_for_display(), self.editor_name)
         cwd = os.path.dirname(doc.get_uri_for_display()) or None
 
         start, end = doc.get_bounds()
@@ -236,7 +253,7 @@ class ShoebotPlugin(GObject.Object, Editor.WindowActivatable, PeasGtk.Configurab
         else:
             return False
 
-    def on_toggle_live_coding(self, action, user_data):
+    def toggle_live_coding(self, action, user_data):
         panel = self.window.get_bottom_panel()
         if self.live_coding_enabled and self.bot:
             doc = self.window.get_active_document()
@@ -256,14 +273,14 @@ class ShoebotPlugin(GObject.Object, Editor.WindowActivatable, PeasGtk.Configurab
         return widget
 
 
-class ShoebotPluginMenu(GObject.Object, Editor.AppActivatable):
-    app = GObject.property(type=Editor.App)
+class AppMenuHelper(object):
 
-    def __init__(self):
-        GObject.Object.__init__(self)
-        self.tools_menu_ext = None
+    def __init__(self, app_plugin, editor_class, app):
+        self.app_plugin = app_plugin
+        self.editor_class = editor_class
+        self.app = app
 
-    def build_menu(self):
+    def build_example_menu(self):
         menu = Gio.Menu.new()
 
         examples_item, examples = example_menu_actions(_("E_xamples"))
@@ -280,17 +297,18 @@ class ShoebotPluginMenu(GObject.Object, Editor.AppActivatable):
 
         return menu
 
-    def do_activate(self):
+    def activate(self):
         for name, accel in WINDOW_ACCELS:
+            print("win.on_%s" % name)
             self.app.set_accels_for_action("win.on_%s" % name, (accel, None))
 
-        menu = self.build_menu()
+        menu = self.build_example_menu()
 
         base = Gio.MenuItem.new_submenu(_("Shoebot"), menu)
-        self.tools_menu_ext = self.extend_menu("tools-section")
+        self.tools_menu_ext = self.app_plugin.extend_menu("tools-section")
         self.tools_menu_ext.append_menu_item(base)
 
-    def do_deactivate(self):
+    def deactivate(self):
         for name, accel in WINDOW_ACCELS:
             self.app.set_accels_for_action("win.on_%s" % name, ())
         self.tools_menu_ext.remove_items()

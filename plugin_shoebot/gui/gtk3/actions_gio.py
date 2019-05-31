@@ -44,8 +44,10 @@ class GioActionHelperMixin:
         :return:
         """
         if value is None:
+            print(self, "create_standard_action", name)
             self.create_standard_action(name)
         elif value in [True, False]:
+            print(self, "create_toggle_action", name, value)
             self.create_toggle_action(name, value)
         else:
             raise ValueError('Unknown Action: {}'.format(str(action_data)))
@@ -88,12 +90,13 @@ class GioActionHelperMixin:
         :param name: variable prefix, full name will be {name}_enabled
         :param value: initial value
         """
+
         def default_toggle_handler(action, user_data):
             enabled = not action.get_state().get_boolean()
             action.set_state(GLib.Variant.new_boolean(enabled))
             setattr(self, "{}_enabled".format(name), enabled)
 
-            handler = getattr(self, "on_toggle_{name}".format(name=name), None)
+            handler = getattr(self, "toggle_{name}".format(name=name), None)
             if handler:
                 handler(action, user_data)
 

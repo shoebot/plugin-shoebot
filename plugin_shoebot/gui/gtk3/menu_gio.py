@@ -2,6 +2,7 @@ import base64
 import os
 
 from gi.repository import Gio
+
 from plugin_shoebot.gui.gtk3.preferences import preferences
 from plugin_shoebot.utils import make_readable_filename
 

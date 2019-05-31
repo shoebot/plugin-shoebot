@@ -1,1 +1,1 @@
-from ...functools32 import *
+from .functools32 import *

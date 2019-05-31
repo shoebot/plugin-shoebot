@@ -136,7 +136,8 @@ class ShoebotProcess(object):
             cookie = str(uuid.uuid4())
             response = CommandResponse(cmd, cookie, None, info=[])
             self.responses[cookie] = response
-            args = list(args) + [b'cookie=' + bytes(cookie, "ascii")]
+            ##import pdb; pdb.set_trace()
+            args = list(args) + ['cookie=' + cookie]
         if args:
             bytes_args = []
             for arg in args:
