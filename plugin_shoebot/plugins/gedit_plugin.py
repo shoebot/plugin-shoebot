@@ -15,7 +15,7 @@ class ShoebotPlugin(GObject.Object, Gedit.WindowActivatable, PeasGtk.Configurabl
 
     def do_activate(self):
         window = self.window
-        apply_shims(window)
+        apply_shims(Gedit, window)
         self.window_helper = ShoebotWindowHelperGio(self.window, 'gedit ')
         self.window_helper.do_activate()
         # panel_helper = GtkStackPanelHelper(window)

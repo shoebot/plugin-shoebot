@@ -161,8 +161,11 @@ class ShoebotProcess(object):
         """
         Close outputs of process.
         """
-        self.process.stdout.close()
-        self.process.stderr.close()
+        try:
+            self.process.stdout.close()
+            self.process.stderr.close()
+        except IOError:
+            pass
         self.running = False
 
     def filter_command_response(self, line):

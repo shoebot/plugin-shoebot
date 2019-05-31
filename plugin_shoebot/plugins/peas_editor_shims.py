@@ -25,7 +25,17 @@ def apply_panel_shims(panel):
 # window shims
 def shim_create_tab_from_location(window):
     if not hasattr(window, "create_tab_from_location"):
-        print("No create_tab_from_location - probably pluma")
+        if hasattr(window, "create_tab_from_uri"):
+            # Pluma has the older create_tab_from_uri API
+            def create_tab_from_location(window, location, encoding, line_pos, column_pos, create, jump_to):
+                uri = location.get_uri()  # location is a GFile
+                window.create_tab_from_uri(uri,
+                                           encoding,
+                                           0,
+                                           False,  # Do not create a new file
+                                           True)  # Switch to tab
+
+            window.create_tab_from_location = create_tab_from_location.__get__(window)
     elif hasattr(window, "create_tab_from_location"):
         # Xed doesn't have the column_pos parameter
         f = window.create_tab_from_location
@@ -40,8 +50,15 @@ def shim_create_tab_from_location(window):
             window.create_tab_from_location = create_tab_from_location.__get__(window)
 
 
-def apply_shims(window):
+def apply_editor_shims(editor_class):
+    if not hasattr(editor_class, "encoding_get_current"):
+        # Shim for Xed -
+        editor_class.encoding_get_current = (lambda self: None).__get__(editor_class)
+
+
+def apply_shims(editor_class, window):
     panel = window.get_bottom_panel()
+    apply_editor_shims(editor_class)
     apply_panel_shims(panel)
 
     shim_create_tab_from_location(window)

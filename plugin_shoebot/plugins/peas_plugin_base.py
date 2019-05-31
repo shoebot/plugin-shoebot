@@ -79,108 +79,6 @@ class ShoebotOutputWidget(ScrollingOutputWidget):
     pass
 
 
-class ShoebotWindowHelperUIManager(object):
-    # Old style Gtk3 window (Pluma, Xed)
-    def __init__(self, plugin_helper, editor_class, window):
-        self.plugin_helper = plugin_helper
-        self.editor_class = editor_class
-        self.window = window
-        self.example_bots = {}
-
-    def insert_menu(self):
-        examples_xml, example_actions, submenu_actions = example_menu_xml()
-
-        ui_str = MENU_UI.format(examples_xml)
-
-        manager = self.window.get_ui_manager()
-        self.action_group = Gtk.ActionGroup("ShoebotPluginActions")
-        self.action_group.add_actions([
-            ("Shoebot", None, _("Shoe_bot"), None, _("Shoebot"), None),
-            ("ShoebotRun", None, _("Run in Shoebot"), '<control>R', _("Run in Shoebot"), self.on_run),
-            ('ShoebotOpenExampleMenu', None, _('E_xamples'), None, None, None)
-        ])
-
-        for action, label in example_actions:
-            self.action_group.add_actions([(action, None, label, None, None, self.on_open_example)])
-
-        for action, label in submenu_actions:
-            self.action_group.add_actions([(action, None, label, None, None, None)])
-
-        self.action_group.add_toggle_actions([
-            ("ShoebotSocket", None, _("Enable Socket Server"), '<control><alt>S', _("Enable Socket Server"),
-             self.toggle_socket_server, False),
-            ("ShoebotVarWindow", None, _("Show Variables Window"), '<control><alt>V', _("Show Variables Window"),
-             self.toggle_var_window, False),
-            ("ShoebotFullscreen", None, _("Go Fullscreen"), '<control><alt>F', _("Go Fullscreen"),
-             self.toggle_fullscreen, False),
-            ("ShoebotLive", None, _("Live Code"), '<control><alt>C', _("Live Code"), self.toggle_livecoding, False),
-        ])
-        manager.insert_action_group(self.action_group)
-
-        self.ui_id = manager.add_ui_from_string(ui_str)
-        manager.ensure_update()
-
-    def remove_menu(self):
-        manager = self.window.get_ui_manager()
-        manager.remove_action_group(self.action_group)
-        for bot, ui_id in self.example_bots.items():
-            manager.remove_ui(ui_id)
-        manager.remove_ui(self.ui_id)
-
-        # Make sure the manager updates
-        manager.ensure_update()
-
-    def on_open_example(self, action):
-        example_dir = preferences.example_dir
-        filename = os.path.join(example_dir, action.get_name()[len('ShoebotOpenExample'):].strip())
-
-        drive, directory = os.path.splitdrive(os.path.abspath(os.path.normpath(filename)))
-        uri = "file:///%s%s" % (drive, directory)
-        if hasattr(self.window, 'create_tab_from_uri'):
-            print(self, "create_tab_from_uri")
-            self.window.create_tab_from_uri(uri,
-                                            self.editor_class.encoding_get_current(),
-                                            0,
-                                            False,  # Do not create a new file
-                                            True)  # Switch to tab
-        else:
-            print(self, "create_tab_from_location gio")
-            gio_file = Gio.file_new_for_uri(uri)
-            self.window.create_tab_from_location(
-                gio_file,
-                None,  # encoding
-                0,
-                0,  # column
-                False,  # Do not create an empty file
-                True)  # Switch to the tab
-
-    def on_run(self, action):
-        # TODO - bit hacky, some re-org needed
-        self.plugin_helper.menu_helper.start_shoebot()
-
-    def toggle_socket_server(self, action):
-        self.use_socketserver = action.get_active()
-
-    def toggle_var_window(self, action):
-        self.show_varwindow = action.get_active()
-
-    def toggle_fullscreen(self, action):
-        self.use_fullscreen = action.get_active()
-
-    def toggle_livecoding(self, action):
-        self.livecoding = action.get_active()
-        panel = self.window.get_bottom_panel()
-        if self.livecoding and self.bot:
-            doc = self.window.get_active_document()
-            source = self.get_source(doc)
-            self.bot.live_source_load(source)
-
-            icon = Gtk.Image()
-            panel.add_item(self.live_text, 'Shoebot Live', 'Shoebot Live', icon)
-        else:
-            panel.remove_item(self.live_text)
-
-
 class WidgetPanelHelper(object):
     """
     PanelHelper for the old style panel (Gedit 3.10, Xed, Pluma)
@@ -205,15 +103,14 @@ class WidgetPanelHelper(object):
         panel.remove_item(self.live_output)
 
 
-class ShoebotPluginHelper(object):
-    def __init__(self, editor_class, window, panel_helper, menu_helper):
+class ShoebotPluginHelperMixin(object):
+    def __init__(self, editor_class, window, panel_helper):
         """
         :param editor_class: e.g. Xed, Pluma, Gedit
         :param window:
         """
         self.editor = editor_class
         self.panel_helper = panel_helper
-        self.menu_helper = menu_helper
         # self.panel_helper = WidgetPanelHelper(window)
         # self.menu_helper = UIManagerWindowHelper(self, editor_class, window)
         self.window = window
@@ -234,11 +131,11 @@ class ShoebotPluginHelper(object):
         self.bot = None
 
     def activate(self):
-        self.menu_helper.insert_menu()
+        self.insert_menu()
         self.panel_helper.add_output_widgets()
 
     def deactivate(self):
-        self.menu_helper.remove_menu()
+        self.remove_menu()
         self.panel_helper.remove_output_widgets()
         self.window = None
 
@@ -252,6 +149,7 @@ class ShoebotPluginHelper(object):
             self.started = True
 
     def start_shoebot(self):
+        print("start_shoebot", self)
         shoebot_binary = preferences.shoebot_binary
         if not shoebot_binary:
             self.panel_helper.shoebot_output.clear_text('sbot not found in path.')
@@ -358,3 +256,99 @@ class ShoebotPluginHelper(object):
                 Gtk.main_iteration()
 
         return self.bot and self.bot.running
+
+
+class ShoebotWindowHelperUIManager(ShoebotPluginHelperMixin):
+    # Old style Gtk3 window (Pluma, Xed)
+    def __init__(self, plugin_helper, editor_class, window, panel_helper):
+        ShoebotPluginHelperMixin.__init__(self, editor_class, window, panel_helper)
+        self.plugin_helper = plugin_helper
+        self.editor_class = editor_class
+        self.window = window
+        self.example_bots = {}
+
+    def insert_menu(self):
+        examples_xml, example_actions, submenu_actions = example_menu_xml()
+
+        ui_str = MENU_UI.format(examples_xml)
+
+        manager = self.window.get_ui_manager()
+        self.action_group = Gtk.ActionGroup("ShoebotPluginActions")
+        self.action_group.add_actions([
+            ("Shoebot", None, _("Shoe_bot"), None, _("Shoebot"), None),
+            ("ShoebotRun", None, _("Run in Shoebot"), '<control>R', _("Run in Shoebot"), self.on_run),
+            ('ShoebotOpenExampleMenu', None, _('E_xamples'), None, None, None)
+        ])
+
+        for action, label in example_actions:
+            self.action_group.add_actions([(action, None, label, None, None, self.on_open_example)])
+
+        for action, label in submenu_actions:
+            self.action_group.add_actions([(action, None, label, None, None, None)])
+
+        self.action_group.add_toggle_actions([
+            ("ShoebotSocket", None, _("Enable Socket Server"), '<control><alt>S', _("Enable Socket Server"),
+             self.toggle_socket_server, False),
+            ("ShoebotVarWindow", None, _("Show Variables Window"), '<control><alt>V', _("Show Variables Window"),
+             self.toggle_var_window, False),
+            ("ShoebotFullscreen", None, _("Go Fullscreen"), '<control><alt>F', _("Go Fullscreen"),
+             self.toggle_fullscreen, False),
+            ("ShoebotLive", None, _("Live Code"), '<control><alt>C', _("Live Code"), self.toggle_livecoding, False),
+        ])
+        manager.insert_action_group(self.action_group)
+
+        self.ui_id = manager.add_ui_from_string(ui_str)
+        manager.ensure_update()
+
+    def remove_menu(self):
+        manager = self.window.get_ui_manager()
+        manager.remove_action_group(self.action_group)
+        for bot, ui_id in self.example_bots.items():
+            manager.remove_ui(ui_id)
+        manager.remove_ui(self.ui_id)
+
+        # Make sure the manager updates
+        manager.ensure_update()
+
+    def on_open_example(self, action):
+        example_dir = preferences.example_dir
+        filename = os.path.join(example_dir, action.get_name()[len('ShoebotOpenExample'):].strip())
+
+        drive, directory = os.path.splitdrive(os.path.abspath(os.path.normpath(filename)))
+        uri = "file:///%s%s" % (drive, directory)
+        gio_file = Gio.file_new_for_uri(uri)
+        encoding = self.editor_class.encoding_get_current()
+        self.window.create_tab_from_location(
+            gio_file,
+            encoding,
+            0,
+            0,  # column
+            False,  # Do not create an empty file
+            True)  # Switch to the tab
+
+    def on_run(self, action):
+        self.start_shoebot()
+        # TODO - bit hacky, some re-org needed
+        self.start_shoebot()
+
+    def toggle_socket_server(self, action):
+        self.use_socketserver = action.get_active()
+
+    def toggle_var_window(self, action):
+        self.show_varwindow = action.get_active()
+
+    def toggle_fullscreen(self, action):
+        self.use_fullscreen = action.get_active()
+
+    def toggle_livecoding(self, action):
+        self.livecoding = action.get_active()
+        panel = self.window.get_bottom_panel()
+        if self.livecoding and self.bot:
+            doc = self.window.get_active_document()
+            source = self.get_source(doc)
+            self.bot.live_source_load(source)
+
+            icon = Gtk.Image()
+            panel.add_item(self.live_text, 'Shoebot Live', 'Shoebot Live', icon)
+        else:
+            panel.remove_item(self.live_text)

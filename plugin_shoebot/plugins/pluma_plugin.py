@@ -1,7 +1,7 @@
 from gi.repository import GObject, Peas, PeasGtk, Pluma
 
 from plugin_shoebot.plugins.peas_editor_shims import apply_shims
-from .peas_plugin_base import ShoebotPluginHelper, ShoebotPreferences, ShoebotWindowHelperUIManager, WidgetPanelHelper
+from .peas_plugin_base import ShoebotPreferences, ShoebotWindowHelperUIManager, WidgetPanelHelper
 
 
 class PlumaShoebotPlugin(GObject.Object, Peas.Activatable, PeasGtk.Configurable):
@@ -14,16 +14,16 @@ class PlumaShoebotPlugin(GObject.Object, Peas.Activatable, PeasGtk.Configurable)
 
     def do_activate(self):
         window = self.object
-        apply_shims(window)
+        apply_shims(Pluma, window)
 
         panel_helper = WidgetPanelHelper(window)
-        menu_helper = ShoebotWindowHelperUIManager(self, Pluma, window)
-        self.menu = ShoebotPluginHelper(Pluma, window, panel_helper, menu_helper)
-        self.menu.activate()
+
+        self.menu_helper = ShoebotWindowHelperUIManager(self, Pluma, window, panel_helper)
+        self.menu_helper.activate()
 
     def do_deactivate(self):
         window = self.object
-        self.menu.deactivate()
+        self.menu_helper.deactivate()
 
     def do_update_state(self):
         window = self.object
